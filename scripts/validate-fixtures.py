@@ -16,7 +16,11 @@ CATALOG = ROOT / "evals" / "cases.json"
 
 
 def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, capture_output=True, text=True, check=False, timeout=120)
+    environment = os.environ.copy()
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    return subprocess.run(
+        command, cwd=cwd, capture_output=True, text=True, check=False, timeout=120, env=environment
+    )
 
 
 def main() -> int:
