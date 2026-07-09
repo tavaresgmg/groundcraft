@@ -16,6 +16,8 @@ Research when the task depends on current, external, unfamiliar, disputed, high-
 6. Use forums and social discussion for lived experience and failure discovery, not as sole proof of API, security, or compatibility claims.
 7. Compare source date, product version, environment, and author incentives.
 
+Do not call a search systematic unless its protocol, coverage, inclusion criteria, and exclusions support that claim. For ordinary engineering research, aim for decision-relevant coverage and state the limit.
+
 Use specialized documentation, web, repository, browser, or social-research tools already available in the host. Do not add a dependency merely to perform routine research.
 
 ## Evidence record

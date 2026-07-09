@@ -1,0 +1,8 @@
+diff --git a/client.py b/client.py
+--- a/client.py
++++ b/client.py
+@@ -1,3 +1,3 @@
+ def transport_timeout_seconds(timeout_ms: int) -> float:
+     """Convert the public millisecond timeout for the seconds-based transport."""
+-    return float(timeout_ms)
++    return timeout_ms / 1000
