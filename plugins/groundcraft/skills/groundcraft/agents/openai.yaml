@@ -1,0 +1,6 @@
+interface:
+  display_name: "Groundcraft"
+  short_description: "Evidence-driven autonomous software engineering"
+  default_prompt: "Use $groundcraft to take this software task from intent to verified delivery."
+policy:
+  allow_implicit_invocation: true

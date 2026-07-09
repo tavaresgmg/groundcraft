@@ -1,0 +1,20 @@
+{
+  "name": "groundcraft",
+  "interface": {
+    "displayName": "Groundcraft"
+  },
+  "plugins": [
+    {
+      "name": "groundcraft",
+      "source": {
+        "source": "local",
+        "path": "./plugins/groundcraft"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

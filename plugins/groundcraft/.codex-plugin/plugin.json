@@ -1,0 +1,38 @@
+{
+  "name": "groundcraft",
+  "version": "0.1.0",
+  "description": "Evidence-driven autonomous software engineering for Codex.",
+  "author": {
+    "name": "Guilherme Tavares",
+    "url": "https://github.com/tavaresgmg"
+  },
+  "homepage": "https://github.com/tavaresgmg/groundcraft",
+  "repository": "https://github.com/tavaresgmg/groundcraft",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "software-engineering",
+    "agents",
+    "workflow",
+    "verification"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Groundcraft",
+    "shortDescription": "Evidence-driven autonomous engineering.",
+    "longDescription": "Groundcraft takes software work from intent through research, implementation, proof, and delivery while scaling process to size and risk.",
+    "developerName": "Guilherme Tavares",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/tavaresgmg/groundcraft",
+    "defaultPrompt": [
+      "Take this task from intent to verified delivery.",
+      "Diagnose this bug and prove the root-cause fix.",
+      "Research the trade-offs and recommend one design."
+    ]
+  }
+}

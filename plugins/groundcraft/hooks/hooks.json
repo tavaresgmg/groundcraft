@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s\\n' 'For software engineering work, apply the $groundcraft skill automatically. Do not ask the user to choose a workflow.'",
+            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'For software engineering work, apply the $groundcraft skill automatically. Do not ask the user to choose a workflow.'\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s\\n' 'Apply $groundcraft to software engineering work. Stay within the delegated scope and return evidence, not confidence.'",
+            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to software engineering work. Stay within the delegated scope and return evidence, not confidence.'\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

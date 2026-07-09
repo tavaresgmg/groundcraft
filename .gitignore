@@ -1,0 +1,11 @@
+!.agents/
+!.agents/plugins/
+!.agents/plugins/marketplace.json
+!plugins/
+!plugins/groundcraft/
+!plugins/groundcraft/**
+
+.DS_Store
+__pycache__/
+*.pyc
+.eval-results/
