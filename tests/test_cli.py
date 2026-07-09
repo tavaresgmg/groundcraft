@@ -127,7 +127,8 @@ class EvalCliTest(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(socket, "AF_UNIX"), "requires Unix sockets")
     def test_materialize_moves_git_socket(self) -> None:
-        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+        socket_tmp = Path("/tmp") if Path("/tmp").is_dir() else TEST_TMP
+        with tempfile.TemporaryDirectory(dir=socket_tmp) as directory:
             root = Path(directory)
             workspace = root / "workspace"
             (workspace / ".git").mkdir(parents=True)
