@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TEST_TMP = ROOT.parent / "work" / "groundcraft" / "tests"
+TEST_TMP = Path(tempfile.gettempdir()) / "groundcraft-tests"
 
 
 def load_module(name: str, relative_path: str):
@@ -91,6 +91,7 @@ class ValidationCliTest(unittest.TestCase):
 class EvalCliTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        TEST_TMP.mkdir(parents=True, exist_ok=True)
         cls.catalog = json.loads((ROOT / "evals" / "cases.json").read_text(encoding="utf-8"))
         cls.runner = load_module("groundcraft_run_evals", "scripts/run-evals.py")
 
