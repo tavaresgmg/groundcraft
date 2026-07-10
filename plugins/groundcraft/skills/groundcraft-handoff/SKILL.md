@@ -9,13 +9,14 @@ Preserve only the context needed to resume unfinished work without reconstructin
 
 ## Storage
 
-- Store handoffs only in `$HOME/Developer/work/handoffs`. Never store runtime handoffs in a repository, skill, or plugin cache, and reject a symlink at the durable directory boundary.
-- Name each file `<workspace>-<slug>.md` in lowercase ASCII kebab-case. Derive `workspace` from the first directory below `~/Developer` that contains the current working directory; use `pessoal` outside that tree.
+- Store handoffs only in `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs`. Never store runtime handoffs in a repository, skill, or plugin cache, and reject a symlink at the durable directory boundary.
+- Name each file `<workspace>-<slug>.md` in lowercase ASCII kebab-case. Derive `workspace` from the Git root basename when inside a repository; otherwise use the current directory basename. Normalize it to lowercase ASCII kebab-case and use `pessoal` only when normalization is empty.
 - On POSIX systems, run `scripts/handoffs` without a filter to validate and list the durable directory. Pass a workspace name only to narrow the listing; validation still covers every file.
+- Run `scripts/handoffs --migrate-legacy` before the first listing. It safely moves a valid legacy `$HOME/Developer/work/handoffs` store when the portable store is empty, and becomes a no-op after migration. Never merge two populated stores automatically.
 
 ## Start or resume
 
-1. Run `scripts/handoffs` once on the first substantial work turn in a thread.
+1. Run `scripts/handoffs --migrate-legacy` once on the first substantial work turn in a thread. This also validates and lists the portable store.
 2. Read handoffs that match the current workspace. If one matches the requested objective, propose resuming it before starting duplicate work.
 3. If the user requested a different objective, mention a current-workspace handoff in one line and continue with the requested work.
 4. Surface `ALERTA` immediately. Surface unrelated `STALE` entries only to decide whether to continue, update, or delete them.

@@ -127,8 +127,10 @@ def validate_handoff_skill(errors: list[str]) -> None:
         errors.append("groundcraft-handoff skill name must match its directory")
     if len(text.splitlines()) > 100:
         errors.append("groundcraft-handoff/SKILL.md exceeds the 100-line budget")
-    if "$HOME/Developer/work/handoffs" not in text or "Never store runtime handoffs in a repository" not in text:
+    if "${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs" not in text or "Never store runtime handoffs in a repository" not in text:
         errors.append("groundcraft-handoff must keep durable state outside repositories and plugin caches")
+    if "scripts/handoffs --migrate-legacy" not in text or "Never merge two populated stores automatically" not in text:
+        errors.append("groundcraft-handoff must require safe one-time legacy migration")
 
     try:
         agent = (HANDOFF / "agents" / "openai.yaml").read_text(encoding="utf-8")
@@ -153,8 +155,14 @@ def validate_handoff_skill(errors: list[str]) -> None:
     else:
         if not mode & stat.S_IXUSR:
             errors.append("groundcraft-handoff/scripts/handoffs must be executable")
-        if 'DIR="$HOME/Developer/work/handoffs"' not in script_text or 'if [ -L "$DIR" ]' not in script_text:
+        if 'CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}"' not in script_text or 'DIR="$CODEX_ROOT/groundcraft/handoffs"' not in script_text:
+            errors.append("handoffs script must use the portable Codex state root")
+        if 'LEGACY_DIR="$HOME/Developer/work/handoffs"' not in script_text or "--migrate-legacy" not in script_text:
+            errors.append("handoffs script must support legacy migration")
+        if 'if [ -L "$DIR" ]' not in script_text:
             errors.append("handoffs script must enforce the durable root and reject a symlink boundary")
+        if 'mkdir "$LOCK_DIR"' not in script_text or "set -C" not in script_text or '"$store"/..?*' not in script_text:
+            errors.append("handoffs migration must serialize, avoid clobbering, and validate double-dot entries")
 
 
 def validate_hooks(errors: list[str]) -> None:
