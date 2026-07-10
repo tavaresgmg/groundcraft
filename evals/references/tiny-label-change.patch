@@ -1,0 +1,19 @@
+diff --git a/test_ui.py b/test_ui.py
+--- a/test_ui.py
++++ b/test_ui.py
+@@ -5,7 +5,7 @@
+ 
+ class SaveButtonTest(unittest.TestCase):
+     def test_label(self) -> None:
+-        self.assertEqual(save_button_label(), "Save")
++        self.assertEqual(save_button_label(), "Save changes")
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/ui.py b/ui.py
+--- a/ui.py
++++ b/ui.py
+@@ -1,2 +1,2 @@
+ def save_button_label() -> str:
+-    return "Save"
++    return "Save changes"

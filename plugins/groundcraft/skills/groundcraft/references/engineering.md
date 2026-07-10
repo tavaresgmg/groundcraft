@@ -9,6 +9,8 @@ Optimize for the smallest correct and maintainable change, not the fewest lines.
 3. Reproduce the failure or establish current behavior when feasible.
 4. Fix the shared root cause rather than the reported symptom.
 
+Define the behavioral contract at the public or integration boundary before choosing an internal design. For a defect, prefer a regression that fails for the original reason before applying the fix when feasible. For exploratory or presentation-only work, use the cheapest faithful proof instead of forcing test-first ritual.
+
 ## Design ladder
 
 Stop at the first option that safely holds:
@@ -20,6 +22,16 @@ Stop at the first option that safely holds:
 5. add the minimum new code or dependency justified by evidence.
 
 Prefer deep modules with small public interfaces. Add an abstraction only when it hides a real changing decision or decouples real consumers. Do not add factories, interfaces, configuration, fallbacks, or compatibility paths for imagined futures.
+
+## Code quality
+
+- Make invalid states hard to represent at boundaries; validate untrusted input and preserve useful error context.
+- Keep policy separate from mechanism when they change for different reasons.
+- Prefer explicit data flow and local reasoning over hidden global state, action at a distance, or clever compression.
+- Test observable contracts and boundary failures, not private implementation shape.
+- Treat security, accessibility, data integrity, observability, and performance as requirements when the affected path depends on them; do not invoke them as generic ceremony.
+- Comments explain a non-obvious constraint or why, not what readable code already says.
+- Optimize after measurement unless the design would create an obvious unbounded or catastrophic path.
 
 ## Dependencies
 

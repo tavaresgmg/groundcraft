@@ -14,6 +14,12 @@ Keep only what the current decision requires:
 
 Prefer focused searches, symbols, diffs, and short command output. Summarize long material; do not paste entire trees, logs, documentation, or conversations without demonstrated need.
 
+Start with no auxiliary reference. Load a module, file, source, or tool only when it resolves a current uncertainty. When evidence grows, replace raw history with the smallest decision-and-proof record that preserves safe continuation.
+
+## Quarantine unrelated state
+
+Match persisted context to the current objective, repository, artifact, and authority before using it. Ignore unrelated handoffs, plans, branches, memories, and pending tasks unless they create a concrete collision, dependency, or permission constraint. Do not mention them merely because they exist, and never use one task's incomplete state as evidence about another task's outcome.
+
 ## Scale
 
 - `tiny`: no plan artifact; inspect, change, prove, close.

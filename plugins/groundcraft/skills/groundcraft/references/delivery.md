@@ -4,7 +4,7 @@ Land only verified, reviewable work.
 
 ## Git and integration
 
-Follow controlling repository and user instructions for branch, worktree, commit, synchronization, push, and pull request behavior. Before external delivery:
+Follow [workspace.md](workspace.md) plus controlling repository and user instructions for branch, worktree, commit, synchronization, push, and pull request behavior. Before external delivery:
 
 1. inspect status, staged changes, and full relevant diff;
 2. exclude unrelated, generated, temporary, secret, or agent-state files;
@@ -13,6 +13,8 @@ Follow controlling repository and user instructions for branch, worktree, commit
 5. obtain any required approval before push, PR, release, or deployment.
 
 Never overwrite, stash, revert, or absorb another person's work without authorization.
+
+For a release or deployment, verify that the reviewed artifact is the artifact delivered. Use provenance, staged rollout, target-state observation, abort criteria, and rollback according to risk. A canary reduces blast radius but does not prove paths it did not exercise.
 
 ## Communication
 
@@ -26,7 +28,7 @@ Close with:
 - `remaining risk`;
 - `next approval`, only when needed.
 
-Draft PRs, reviews, issues, tickets, release notes, and messages locally. Show the exact text and request approval before publishing or sending when controlling instructions require it. Keep technical claims traceable to evidence.
+Treat PRs, reviews, issues, tickets, release notes, and messages as claims even while they are drafts. Keep every factual statement traceable to evidence; when evidence is missing, request it or write explicit uncertainty instead of the desired claim. Show supported text and request approval before publishing or sending when controlling instructions require it.
 
 ## Cleanup
 

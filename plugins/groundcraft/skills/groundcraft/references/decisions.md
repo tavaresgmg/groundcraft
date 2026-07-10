@@ -10,6 +10,8 @@ Use this module for material choices, not every implementation detail.
 4. Run an adversarial pass: identify how each option fails, what assumption it hides, and what evidence would falsify it.
 5. Recommend one path and explain why the rejected options lose here.
 
+When uncertainty could reverse the decision, prefer the cheapest reversible experiment that discriminates between options. Do not convert uncertainty into a weighted score whose precision the evidence cannot support.
+
 Do not manufacture alternatives when one path is clearly required by evidence or repository convention.
 
 ## Human decision

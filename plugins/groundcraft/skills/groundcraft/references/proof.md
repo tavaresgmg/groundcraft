@@ -2,6 +2,8 @@
 
 Define proof before the patch. Match it to the failure mode and blast radius.
 
+Separate proof of the requested outcome from proof that execution merely completed. Inspect target state, persisted data, rendered behavior, or external observation when the task changes state.
+
 ## Proof plan
 
 Choose the strongest affordable evidence:
@@ -24,6 +26,17 @@ For bug fixes, show that the check fails without the fix when feasible. Confirm 
 - `critical`: test rollback or restore where applicable and feasible, verify relevant invariants/reconciliation, define abort criteria, and stop before external execution for `go/no-go`.
 
 Security, authorization, money, data, concurrency, and migrations require boundary and partial-failure cases.
+
+## Oracle discipline
+
+- Validate that a test would fail for the targeted defect when feasible; a broken or circular oracle can make good work fail and bad work pass.
+- Keep the agent away from hidden expected outputs when contamination would make the test meaningless, but retain an auditable reference solution and fixture owner.
+- Treat self-review and model-as-judge as triage, not independent proof. Calibrate behavioral rubrics against human review and allow `unknown`.
+- Record the exact task, fixture, model or agent, tools, permissions, versions, commit, run count, and relevant limits for repeatable evaluations.
+- Isolate trials from shared mutable state. Use multiple runs for stochastic behavior and report variance rather than selecting the best run silently.
+- A capability suite should remain challenging; a regression suite should be deterministic where possible and approach complete consistency. Move saturated capability cases into regression coverage.
+
+Use `pass@k` only when one successful candidate among several is useful. Use all-runs consistency (`pass^k`) when any isolated failure matters. Neither compensates for an invalid task or oracle.
 
 ## Review
 

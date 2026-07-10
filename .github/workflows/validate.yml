@@ -15,5 +15,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: python3 -m py_compile scripts/validate.py scripts/validate-fixtures.py scripts/run-evals.py
       - run: python3 scripts/validate.py
+      - run: python3 scripts/validate-fixtures.py
+      - run: python3 -m unittest discover -s tests -v
       - run: python3 scripts/run-evals.py --list
+      - run: python3 scripts/run-evals.py --all --repeat 1 --dry-run

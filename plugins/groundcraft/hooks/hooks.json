@@ -5,8 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s\\n' 'For software engineering work, apply the $groundcraft skill automatically. Do not ask the user to choose a workflow.'",
-            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'For software engineering work, apply the $groundcraft skill automatically. Do not ask the user to choose a workflow.'\"",
+            "command": "printf '%s\\n' 'For substantial software, research, analysis, decision, review, or operational work, apply $groundcraft automatically and ground factual claims, including drafts, in evidence. Do not invoke or announce it for tiny known-path changes with direct proof, casual chat, simple translation or formatting, trivial stable facts, or free ideation. Do not ask the user to choose a workflow.'",
+            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'For substantial software, research, analysis, decision, review, or operational work, apply $groundcraft automatically and ground factual claims, including drafts, in evidence. Do not invoke or announce it for tiny known-path changes with direct proof, casual chat, simple translation or formatting, trivial stable facts, or free ideation. Do not ask the user to choose a workflow.'\"",
             "timeout": 5
           }
         ]
@@ -17,8 +17,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s\\n' 'Apply $groundcraft to software engineering work. Stay within the delegated scope and return evidence, not confidence.'",
-            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to software engineering work. Stay within the delegated scope and return evidence, not confidence.'\"",
+            "command": "printf '%s\\n' 'Apply $groundcraft to substantial delegated work. Stay within scope, keep domain skills in charge of their procedures, and return evidence rather than confidence.'",
+            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to substantial delegated work. Stay within scope, keep domain skills in charge of their procedures, and return evidence rather than confidence.'\"",
             "timeout": 5
           }
         ]
