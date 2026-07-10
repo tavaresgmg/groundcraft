@@ -67,7 +67,13 @@ for file in "$DIR"/*.md; do
   fi
 
   count=$((count + 1))
-  modified=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo "$now")
+  if modified=$(stat -f %m "$file" 2>/dev/null); then
+    :
+  elif modified=$(stat -c %Y "$file" 2>/dev/null); then
+    :
+  else
+    modified=$now
+  fi
   days=$(( (now - modified) / 86400 ))
   stale=""
   if [ "$days" -ge 7 ]; then
