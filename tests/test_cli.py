@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import os
 import socket
 import subprocess
 import tempfile
@@ -12,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEST_TMP = Path(tempfile.gettempdir()) / "groundcraft-tests"
+HANDOFF_SCRIPT = ROOT / "plugins" / "groundcraft" / "skills" / "groundcraft-handoff" / "scripts" / "handoffs"
 
 
 def load_module(name: str, relative_path: str):
@@ -125,6 +127,14 @@ class EvalCliTest(unittest.TestCase):
             )
             self.assertEqual(status.stdout, "")
 
+    def test_eval_home_installs_every_plugin_skill(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            self.runner.install_skills(home)
+            installed = home / ".agents" / "skills"
+            self.assertTrue((installed / "groundcraft" / "SKILL.md").is_file())
+            self.assertTrue((installed / "groundcraft-handoff" / "SKILL.md").is_file())
+
     @unittest.skipUnless(hasattr(socket, "AF_UNIX"), "requires Unix sockets")
     def test_materialize_moves_git_socket(self) -> None:
         socket_tmp = Path("/tmp") if Path("/tmp").is_dir() else TEST_TMP
@@ -141,6 +151,129 @@ class EvalCliTest(unittest.TestCase):
             finally:
                 server.close()
             self.assertTrue((root / "results" / "workspaces" / "socket-case" / "trial-1").is_dir())
+
+
+class HandoffCliTest(unittest.TestCase):
+    def handoff_store(self, home: Path) -> Path:
+        return home / "Developer" / "work" / "handoffs"
+
+    def run_handoffs(self, home: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+        environment = os.environ.copy()
+        environment["HOME"] = str(home)
+        return subprocess.run(
+            [str(HANDOFF_SCRIPT), *arguments], capture_output=True, text=True, check=False, env=environment
+        )
+
+    def write_handoff(self, directory: Path, name: str = "groundcraft-continuity") -> Path:
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / f"{name}.md"
+        path.write_text(
+            """# Integrate durable continuity
+
+- workspace: /tmp/groundcraft
+- branch: feature/continuity
+- criado: 2026-07-09 | atualizado: 2026-07-09
+- status: em-andamento
+
+## Pronto quando
+The plugin resumes verified work.
+
+## Estado
+- [ ] Validate the plugin.
+
+## Próximo passo
+Run python3 scripts/validate.py.
+
+## Bloqueios e risco
+nenhum
+
+## Contexto
+The handoff is a test fixture.
+""",
+            encoding="utf-8",
+        )
+        return path
+
+    def test_missing_directory_is_an_empty_valid_store(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            completed = self.run_handoffs(Path(directory) / "home")
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(completed.stdout.strip(), "0 handoffs pending")
+
+    def test_valid_handoff_lists_title_next_step_and_workspace_filter(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            store = self.handoff_store(home)
+            path = self.write_handoff(store)
+            self.write_handoff(store, "other-separate-task")
+            completed = self.run_handoffs(home, "groundcraft")
+            path.write_text(path.read_text(encoding="utf-8").replace(
+                "Run python3 scripts/validate.py.", "Run python3 -m unittest discover -s tests."
+            ), encoding="utf-8")
+            updated = self.run_handoffs(home, "groundcraft")
+            path.unlink()
+            closed = self.run_handoffs(home, "groundcraft")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("groundcraft-continuity - Integrate durable continuity", completed.stdout)
+        self.assertIn("next: Run python3 scripts/validate.py.", completed.stdout)
+        self.assertNotIn("other-separate-task", completed.stdout)
+        self.assertIn("next: Run python3 -m unittest discover -s tests.", updated.stdout)
+        self.assertNotIn("groundcraft-continuity", closed.stdout)
+
+    def test_legacy_handoff_remains_readable_during_migration(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            store = self.handoff_store(home)
+            store.mkdir(parents=True)
+            (store / "groundcraft-legacy-task.md").write_text(
+                """# Resume a legacy task
+
+- atualizado: 2026-07-09
+
+## Pronto quando
+The task is verified.
+
+## Próximo passo
+Inspect the current state.
+""",
+                encoding="utf-8",
+            )
+            completed = self.run_handoffs(home)
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("groundcraft-legacy-task - Resume a legacy task", completed.stdout)
+
+    def test_invalid_file_fails_the_whole_store_even_when_filtered_out(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            store = self.handoff_store(home)
+            self.write_handoff(store)
+            (store / "unrelated.txt").write_text("bad", encoding="utf-8")
+            completed = self.run_handoffs(home, "groundcraft")
+        self.assertEqual(completed.returncode, 1)
+        self.assertIn("ALERTA: unrelated.txt", completed.stdout)
+
+    def test_old_handoff_is_marked_stale(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            path = self.write_handoff(self.handoff_store(home))
+            old = path.stat().st_mtime - 8 * 86400
+            os.utime(path, (old, old))
+            completed = self.run_handoffs(home)
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[STALE 8d", completed.stdout)
+
+    def test_symlinked_store_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            home = root / "home"
+            store = self.handoff_store(home)
+            store.parent.mkdir(parents=True)
+            target = root / "repository-state"
+            target.mkdir()
+            store.symlink_to(target, target_is_directory=True)
+            completed = self.run_handoffs(home)
+        self.assertEqual(completed.returncode, 1)
+        self.assertIn("durable handoff directory must not be a symlink", completed.stdout)
 
 
 if __name__ == "__main__":

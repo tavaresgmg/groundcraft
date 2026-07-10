@@ -118,6 +118,14 @@ def hook_prompt() -> str:
     return match.group(1)
 
 
+def install_skills(home: Path) -> None:
+    target = home / ".agents" / "skills"
+    target.mkdir(parents=True)
+    for skill in (PLUGIN / "skills").iterdir():
+        if skill.is_dir():
+            shutil.copytree(skill, target / skill.name)
+
+
 def isolated_environment(runtime: Path, workspace: Path) -> dict[str, str]:
     home = runtime / "home"
     codex_home = home / ".codex"
@@ -126,9 +134,7 @@ def isolated_environment(runtime: Path, workspace: Path) -> dict[str, str]:
     if not auth.is_file():
         raise SystemExit(f"Codex auth not found: {auth}")
     (codex_home / "auth.json").symlink_to(auth.resolve())
-    target = home / ".agents" / "skills" / "groundcraft"
-    target.parent.mkdir(parents=True)
-    shutil.copytree(PLUGIN / "skills" / "groundcraft", target)
+    install_skills(home)
     environment = os.environ.copy()
     environment.update({"HOME": str(home), "CODEX_HOME": str(codex_home), "PWD": str(workspace)})
     environment.pop("CODEX_THREAD_ID", None)

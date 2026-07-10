@@ -60,11 +60,13 @@ Classify the intended action, not merely the subject. For `critical`, prepare au
 
 ## Stay proportional
 
-- `tiny`: act directly, use the obvious focused proof, review the narrow result, and close briefly. Do not announce classification, skill, reference loading, or a multi-step plan; keep any host-required update to one short sentence.
+- `tiny`: act directly, use the obvious focused proof, review the narrow result, and close briefly. Do not announce classification, skill, reference loading, or a multi-step plan; keep any host-required update to one short sentence about the immediate action, not a sequence.
 - `standard`: keep a short internal plan and update the user only when evidence, understanding, or risk changes.
 - `large`: work in verified slices and maintain a compact continuity capsule.
 
 Quarantine state from other tasks. Ignore unrelated handoffs, plans, branches, and pending work unless they create a concrete collision or authority risk; never use them as evidence for the current outcome.
+
+On the first substantial work turn, use `$groundcraft-handoff` once to check relevant unfinished work. Persist work only when it will remain incomplete, and close its handoff when done. Skip this for tiny direct tasks.
 
 ## Load only what the task needs
 

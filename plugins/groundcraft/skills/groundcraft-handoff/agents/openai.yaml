@@ -1,0 +1,6 @@
+interface:
+  display_name: "Groundcraft Handoff"
+  short_description: "Persist and resume unfinished work"
+  default_prompt: "Use $groundcraft-handoff to preserve or resume this work safely."
+policy:
+  allow_implicit_invocation: true

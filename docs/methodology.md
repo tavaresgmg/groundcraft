@@ -88,6 +88,8 @@ Groundcraft starts with no auxiliary module and loads references only to resolve
 
 A specialized skill defines domain tools, validation, and output. Groundcraft does not repeat those instructions; it adds only missing cross-cutting controls. A style or communication layer runs last and cannot alter facts, evidence, or authority.
 
+The bundled `groundcraft-handoff` companion owns cross-session continuity. Groundcraft calls it once on the first substantial work turn, persists only unfinished work outside repositories and plugin caches, and closes the record after completion is proven. A resumed handoff restores decisions and evidence pointers, not truth: the agent revalidates current Git, test, dependency, and external state before acting.
+
 ## Change and workspace boundary
 
 - **Narrow:** direct local change; proceed.

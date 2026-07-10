@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - 2026-07-09
+
+- Added the `groundcraft-handoff` companion skill for durable cross-session continuity.
+- Integrated one-time pending-work checks into the first substantial Groundcraft turn while keeping tiny tasks direct.
+- Kept active handoffs outside repositories and plugin caches under `~/Developer/work/handoffs/`.
+- Added deterministic handoff validation and lifecycle regression coverage.
+
 ## 0.2.0 - 2026-07-09
 
 - Generalized the small Groundcraft kernel to substantial research, analysis, decisions, reviews, and operations without activating it for trivial prompts.

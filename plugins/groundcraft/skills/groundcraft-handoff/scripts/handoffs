@@ -1,0 +1,88 @@
+#!/bin/sh
+# Validate and list durable Groundcraft handoffs.
+# Usage: handoffs [workspace]
+
+DIR="$HOME/Developer/work/handoffs"
+FILTER="${1:-}"
+
+if [ -L "$DIR" ]; then
+  echo "ALERTA: $DIR - durable handoff directory must not be a symlink"
+  exit 1
+fi
+
+if [ ! -d "$DIR" ]; then
+  echo "0 handoffs pending"
+  exit 0
+fi
+
+now=$(date +%s)
+count=0
+problems=0
+
+for file in "$DIR"/* "$DIR"/.[!.]*; do
+  [ -e "$file" ] || continue
+  base=$(basename "$file")
+
+  if [ -d "$file" ]; then
+    echo "ALERTA: $base/ - subdirectories are not allowed"
+    problems=$((problems + 1))
+    continue
+  fi
+
+  case "$base" in
+    *.md) ;;
+    *)
+      echo "ALERTA: $base - only .md files are allowed"
+      problems=$((problems + 1))
+      continue
+      ;;
+  esac
+
+  name=${base%.md}
+  if ! printf '%s' "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)+$'; then
+    echo "ALERTA: $base - expected <workspace>-<slug>.md in lowercase ASCII kebab-case"
+    problems=$((problems + 1))
+  fi
+
+  missing=""
+  grep -q '^# ' "$file" || missing="$missing title"
+  grep -q '^## Pronto quando$' "$file" || missing="$missing [Pronto quando]"
+  grep -q '^## Próximo passo$' "$file" || missing="$missing [Próximo passo]"
+  grep -Eq 'atualizado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$file" || missing="$missing [atualizado]"
+
+  if [ -n "$missing" ]; then
+    echo "ALERTA: $base - missing or invalid:$missing"
+    problems=$((problems + 1))
+  fi
+done
+
+for file in "$DIR"/*.md; do
+  [ -e "$file" ] || continue
+  name=$(basename "$file" .md)
+  if [ -n "$FILTER" ]; then
+    case "$name" in
+      "$FILTER"-*) ;;
+      *) continue ;;
+    esac
+  fi
+
+  count=$((count + 1))
+  modified=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo "$now")
+  days=$(( (now - modified) / 86400 ))
+  stale=""
+  if [ "$days" -ge 7 ]; then
+    stale=" [STALE ${days}d - decide whether to continue, update, or delete]"
+  fi
+  title=$(sed -n 's/^# //p' "$file" | head -1)
+  next=$(sed -n '/^## Próximo passo$/,/^## /p' "$file" | sed '1d;/^## /d;/^[[:space:]]*$/d' | head -1)
+  printf '%s - %s (%sd)%s\n  next: %s\n' "$name" "${title:-untitled}" "$days" "$stale" "${next:-(missing next step)}"
+done
+
+if [ "$count" -eq 0 ]; then
+  echo "0 handoffs pending"
+fi
+
+if [ "$problems" -gt 0 ]; then
+  echo "$problems handoff problem(s) require attention"
+  exit 1
+fi
