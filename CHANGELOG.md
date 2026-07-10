@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Added a one-command local development install that keeps cachebusters and generated marketplace state outside the repository.
+- Added cached, uncached, output, and reasoning token usage to behavioral evaluation results and summaries.
+
 ## 0.4.0 - 2026-07-10
 
 - Added a proof budget that starts with focused evidence, accounts for user wait, and stops when required claims are sufficiently proven.

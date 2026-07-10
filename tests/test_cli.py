@@ -113,8 +113,41 @@ class EvalCliTest(unittest.TestCase):
         events = "\n".join((
             json.dumps({"type": "item.completed", "item": {"type": "agent_message", "text": "ok"}}),
             json.dumps({"type": "item.completed", "item": {"type": "command_execution"}}),
+            json.dumps({"type": "turn.completed", "usage": {
+                "input_tokens": 120, "cached_input_tokens": 80, "output_tokens": 12,
+                "reasoning_output_tokens": 4,
+            }}),
         ))
-        self.assertEqual(self.runner.parse_events(events), ("ok", 1))
+        self.assertEqual(self.runner.parse_events(events), ("ok", 1, {
+            "input_tokens": 120, "cached_input_tokens": 80, "uncached_input_tokens": 40,
+            "output_tokens": 12, "reasoning_output_tokens": 4,
+        }))
+
+    def test_local_marketplace_staging_keeps_source_unchanged(self) -> None:
+        installer = load_module("groundcraft_install_local", "scripts/install-local.py")
+        source_manifest = (installer.SOURCE_PLUGIN / ".codex-plugin" / "plugin.json").read_bytes()
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            staging = installer.stage_marketplace(Path(directory))
+            copied = staging / "plugins" / "groundcraft" / ".codex-plugin" / "plugin.json"
+            payload = json.loads(copied.read_text(encoding="utf-8"))
+            payload["version"] = "0.4.0+codex.test"
+            copied.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertTrue((staging / installer.GENERATED_MARKER).is_file())
+            self.assertTrue((staging / ".agents" / "plugins" / "marketplace.json").is_file())
+            self.assertEqual(
+                (installer.SOURCE_PLUGIN / ".codex-plugin" / "plugin.json").read_bytes(), source_manifest
+            )
+
+    def test_local_marketplace_refuses_unmanaged_target(self) -> None:
+        installer = load_module("groundcraft_install_local_guard", "scripts/install-local.py")
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            staging = installer.stage_marketplace(root)
+            target = root / "dev-marketplace"
+            target.mkdir()
+            installer.STATE_ROOT, installer.DEV_MARKETPLACE = root, target
+            with self.assertRaisesRegex(RuntimeError, "unmanaged dev marketplace"):
+                installer.publish_marketplace(staging)
 
     def test_writable_fixture_is_copied_and_initialized(self) -> None:
         case = next(case for case in self.catalog["cases"] if case["id"] == "tiny-label-change")

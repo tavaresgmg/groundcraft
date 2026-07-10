@@ -14,6 +14,8 @@ Do not add a phase, role, artifact, dependency, hook, or command without evidenc
 
 Groundcraft is the canonical home for cross-cutting workflow rules. When a rule moves here from a personal setup, remove the overlapping global instruction or general-purpose skill in the same change. Keep environment-specific, style, and domain safety rules where they belong.
 
+Use `python3 scripts/install-local.py` while iterating. Publish a release only for a stable checkpoint; local cachebusters belong in the generated Codex-state marketplace, never in the repository manifest.
+
 The validator enforces a 140-line kernel, 80-line reference files, and a 10-14 case catalog. Treat these as complexity budgets, not targets to fill.
 
 Do not weaken a fixture, assertion, hidden oracle, or forbidden criterion to make a result pass. If the task or oracle is invalid, classify it as `invalid` and fix the harness before judging the agent.
