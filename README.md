@@ -34,10 +34,15 @@ Start a new Codex thread after installation. Groundcraft has no required slash c
 
 If hooks are disabled or untrusted, the implicit skill remains available and can be invoked explicitly as `$groundcraft`.
 
+The plugin also installs `$groundcraft-handoff`. On the first substantial work turn, Groundcraft checks relevant unfinished work once. When work remains incomplete, the companion skill stores a compact resume record under `~/Developer/work/handoffs/`; after completion is proven, it removes that record. Tiny completed tasks skip this path. Active handoffs never live in the repository or plugin cache.
+
+The handoff companion currently requires a POSIX shell (macOS or Linux). Groundcraft's core skill and activation hooks remain host-neutral.
+
 ## Structure
 
 ```text
 plugins/groundcraft/              installable Codex plugin
+  skills/groundcraft-handoff/     durable cross-session continuity
 docs/methodology.md               human-readable method
 docs/sources.md                   source lineage and evidence
 evals/cases.json                  behavioral contract cases

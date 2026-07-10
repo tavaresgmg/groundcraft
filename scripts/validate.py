@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import json
 import re
+import stat
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "groundcraft"
 SKILL = PLUGIN / "skills" / "groundcraft"
+HANDOFF = PLUGIN / "skills" / "groundcraft-handoff"
 SEMVER = re.compile(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?")
 
 
@@ -39,6 +41,9 @@ def require_files(errors: list[str]) -> None:
         PLUGIN / "hooks" / "hooks.json",
         SKILL / "SKILL.md",
         SKILL / "agents" / "openai.yaml",
+        HANDOFF / "SKILL.md",
+        HANDOFF / "agents" / "openai.yaml",
+        HANDOFF / "scripts" / "handoffs",
     ]
     paths.extend((SKILL / "references" / name) for name in (
         "context.md", "debugging.md", "decisions.md", "delivery.md", "engineering.md",
@@ -109,6 +114,49 @@ def validate_skill(errors: list[str]) -> None:
             errors.append(f"openai.yaml missing contract: {pattern}")
 
 
+def validate_handoff_skill(errors: list[str]) -> None:
+    try:
+        text = (HANDOFF / "SKILL.md").read_text(encoding="utf-8")
+    except OSError as exc:
+        errors.append(f"groundcraft-handoff/SKILL.md: {exc}")
+        return
+    frontmatter = re.match(r"\A---\n(.*?)\n---\n", text, re.DOTALL)
+    if not frontmatter or set(re.findall(r"(?m)^([a-z_]+):", frontmatter.group(1))) != {"name", "description"}:
+        errors.append("groundcraft-handoff frontmatter must contain only name and description")
+    if frontmatter and "name: groundcraft-handoff" not in frontmatter.group(1):
+        errors.append("groundcraft-handoff skill name must match its directory")
+    if len(text.splitlines()) > 100:
+        errors.append("groundcraft-handoff/SKILL.md exceeds the 100-line budget")
+    if "$HOME/Developer/work/handoffs" not in text or "Never store runtime handoffs in a repository" not in text:
+        errors.append("groundcraft-handoff must keep durable state outside repositories and plugin caches")
+
+    try:
+        agent = (HANDOFF / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    except OSError as exc:
+        errors.append(f"groundcraft-handoff/openai.yaml: {exc}")
+    else:
+        for pattern in (
+            r"(?m)^interface:\s*$",
+            r"(?m)^\s+display_name:\s*['\"]Groundcraft Handoff['\"]\s*$",
+            r"(?m)^\s+default_prompt:\s*['\"].*\$groundcraft-handoff.*['\"]\s*$",
+            r"(?m)^\s+allow_implicit_invocation:\s*true\s*$",
+        ):
+            if not re.search(pattern, agent):
+                errors.append(f"groundcraft-handoff/openai.yaml missing contract: {pattern}")
+
+    script = HANDOFF / "scripts" / "handoffs"
+    try:
+        mode = script.stat().st_mode
+        script_text = script.read_text(encoding="utf-8")
+    except OSError as exc:
+        errors.append(f"groundcraft-handoff/scripts/handoffs: {exc}")
+    else:
+        if not mode & stat.S_IXUSR:
+            errors.append("groundcraft-handoff/scripts/handoffs must be executable")
+        if 'DIR="$HOME/Developer/work/handoffs"' not in script_text or 'if [ -L "$DIR" ]' not in script_text:
+            errors.append("handoffs script must enforce the durable root and reject a symlink boundary")
+
+
 def validate_hooks(errors: list[str]) -> None:
     data = load_json(PLUGIN / "hooks" / "hooks.json", errors)
     hooks = data.get("hooks") if isinstance(data, dict) else None
@@ -144,6 +192,8 @@ def validate_hooks(errors: list[str]) -> None:
     prompt = messages.get("UserPromptSubmit", "")
     if not all(word in prompt for word in ("substantial", "tiny", "casual", "translation")):
         errors.append("UserPromptSubmit must define the activation boundary")
+    if "$groundcraft-handoff" not in prompt or "first" not in prompt or "describing a sequence of steps" not in prompt:
+        errors.append("UserPromptSubmit must integrate one-time handoff continuity")
 
 
 def validate_evals(errors: list[str]) -> None:
@@ -253,6 +303,7 @@ def main() -> int:
     require_files(errors)
     validate_manifest(errors)
     validate_skill(errors)
+    validate_handoff_skill(errors)
     validate_hooks(errors)
     validate_evals(errors)
     for path in ROOT.rglob("*"):

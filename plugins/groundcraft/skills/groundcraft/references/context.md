@@ -30,7 +30,7 @@ Use host-native goals, plans, threads, trackers, or handoffs. Do not create repo
 
 ## Context capsule
 
-For `large` work, save a capsule after each integrated slice and before compaction, interruption, handoff, or session end. Use the host's durable goal, thread, tracker, or handoff mechanism. If no durable mechanism exists, put the capsule in the closing response, state that cross-thread continuity is not guaranteed, and create a file only with authorization and outside the repository by default.
+For `large` work, save a capsule after each integrated slice and before compaction, interruption, handoff, or session end. Use `$groundcraft-handoff` when it is available; otherwise use the host's durable goal, thread, or tracker. If no durable mechanism exists, put the capsule in the closing response, state that cross-thread continuity is not guaranteed, and create a file only with authorization and outside the repository by default.
 
 Retain only:
 
