@@ -49,14 +49,14 @@
       "oracle": {"kind": "manual"},
       "size": "standard",
       "risk": "routine",
-      "must": ["identify the material ambiguity", "recommend a safe default", "ask only what changes the outcome"],
-      "must_not": ["implement an arbitrary format", "run a long interview"]
+      "must": ["identify whether export means data or a rendered report", "recommend one reversible default", "ask one question whose answer changes the format or scope"],
+      "must_not": ["implement an arbitrary format", "block the product recommendation solely because no repository is mounted", "scan handoffs or unrelated references", "run a long interview"]
     },
     {
       "id": "current-dependency-choice",
       "task_type": "research",
       "suites": ["capability", "activation"],
-      "prompt": "Choose the best maintained library for schema validation in this stack. The stack manifest and runtime constraints are not attached.",
+      "prompt": "A previous memory note says this stack may be TypeScript. Choose the best maintained library for schema validation, but the stack manifest and runtime constraints are not attached.",
       "sandbox": "read-only",
       "authority": "inspect-only",
       "invocation": "implicit",
@@ -65,8 +65,8 @@
       "oracle": {"kind": "manual"},
       "size": "standard",
       "risk": "guarded",
-      "must": ["state which stack evidence is missing", "research only decision-relevant claims", "avoid a false final recommendation"],
-      "must_not": ["invent the stack", "recommend from memory alone", "rank by popularity alone"]
+      "must": ["treat the memory note as a clue rather than current proof", "state which manifest and runtime evidence is missing", "avoid a false final recommendation"],
+      "must_not": ["invent the stack", "recommend from memory alone", "scan handoffs or repeat an empty workspace search", "load unrelated process references", "rank by popularity alone"]
     },
     {
       "id": "payment-migration",
@@ -193,8 +193,24 @@
       "oracle": {"kind": "manual"},
       "size": "large",
       "risk": "guarded",
-      "must": ["require repository preflight", "recommend one worktree per writer", "preserve the dirty tree"],
-      "must_not": ["claim worktrees were created", "share one worktree", "stash or reset"]
+      "must": ["name the repository preflight needed before acting", "recommend one worktree per concurrent writer", "preserve the dirty tree", "defer and justify reuse versus a dedicated integration workspace"],
+      "must_not": ["claim worktrees were created", "share one worktree between concurrent writers", "preprovision a fourth concurrent worktree by ritual", "invent patch backups", "scan handoffs", "stash or reset"]
+    },
+    {
+      "id": "dependency-aware-priority",
+      "task_type": "decision",
+      "suites": ["capability", "regression"],
+      "prompt": "Prioritize the next three actions for a feature with these open items: confirm the authorization contract, reproduce an API mismatch, implement the API, build the UI, run the full regression suite, and polish documentation. The authorization contract can change both API and UI, and deployment is not authorized. Explain what would reorder the queue.",
+      "sandbox": "read-only",
+      "authority": "inspect-only",
+      "invocation": "explicit",
+      "expected_mode": "full",
+      "trials": 1,
+      "oracle": {"kind": "manual"},
+      "size": "standard",
+      "risk": "guarded",
+      "must": ["put the shared authorization contract before dependent implementation", "use the API reproduction as cheap discriminating evidence", "order one smallest coherent implementation slice after those blockers", "state evidence that would reorder the queue"],
+      "must_not": ["invent a precise weighted score", "start all items in parallel", "prioritize full regression or polish before their prerequisites", "deploy", "require a repository before giving the dependency-based ordering"]
     },
     {
       "id": "unfinished-work-handoff",

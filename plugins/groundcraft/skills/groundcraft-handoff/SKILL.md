@@ -1,6 +1,6 @@
 ---
 name: groundcraft-handoff
-description: "Persist and resume unfinished Groundcraft work across Codex sessions. Use on the first substantial work turn to check relevant pending work; before pausing incomplete work; when resuming prior work; or when asked to create, update, list, or close a handoff. Do not use for tiny completed tasks."
+description: "Persist or resume unfinished cross-session Groundcraft work. Use only for explicit handoff operations or known continuation; never scan it per task or use it for completed work."
 ---
 
 # Groundcraft Handoff
@@ -12,14 +12,14 @@ Preserve only the context needed to resume unfinished work without reconstructin
 - Store handoffs only in `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs`. Never store runtime handoffs in a repository, skill, or plugin cache, and reject a symlink at the durable directory boundary.
 - Name each file `<workspace>-<slug>.md` in lowercase ASCII kebab-case. Derive `workspace` from the Git root basename when inside a repository; otherwise use the current directory basename. Normalize it to lowercase ASCII kebab-case and use `pessoal` only when normalization is empty.
 - On POSIX systems, run `scripts/handoffs` without a filter to validate and list the durable directory. Pass a workspace name only to narrow the listing; validation still covers every file.
-- Run `scripts/handoffs --migrate-legacy` before the first listing. It safely moves a valid legacy `$HOME/Developer/work/handoffs` store when the portable store is empty, and becomes a no-op after migration. Never merge two populated stores automatically.
+- Run `scripts/handoffs --migrate-legacy` before the first handoff operation. It safely moves a valid legacy `$HOME/Developer/work/handoffs` store when the portable store is empty, and becomes a no-op after migration. Never merge two populated stores automatically.
 
 ## Start or resume
 
-1. Run `scripts/handoffs --migrate-legacy` once on the first substantial work turn in a thread. This also validates and lists the portable store.
-2. Read handoffs that match the current workspace. If one matches the requested objective, propose resuming it before starting duplicate work.
-3. If the user requested a different objective, mention a current-workspace handoff in one line and continue with the requested work.
-4. Surface `ALERTA` immediately. Surface unrelated `STALE` entries only to decide whether to continue, update, or delete them.
+1. When the user resumes prior work, mentions a handoff, or the current task is known to continue unfinished cross-session work, run `scripts/handoffs --migrate-legacy`. This validates and lists the portable store.
+2. Read only handoffs that match the current workspace and objective. If one matches, propose resuming it before starting duplicate work.
+3. Do not surface unrelated pending or stale work unless it creates a concrete collision, dependency, or authority risk.
+4. Surface a relevant `ALERTA` immediately.
 5. On resume, treat the handoff as context, not current evidence. Revalidate Git state, tests, dependencies, external state, and time-sensitive assumptions.
 
 ## Create or update
