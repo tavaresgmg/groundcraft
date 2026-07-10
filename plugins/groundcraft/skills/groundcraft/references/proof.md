@@ -1,6 +1,6 @@
 # Proof
 
-Define proof before the patch. Match it to the failure mode and blast radius.
+Define proof before producing the deliverable. Match it to the failure mode and blast radius.
 
 Separate proof of the requested outcome from proof that execution merely completed. Inspect target state, persisted data, rendered behavior, or external observation when the task changes state.
 
@@ -8,7 +8,7 @@ Separate proof of the requested outcome from proof that execution merely complet
 
 Start with the smallest direct check that can disprove the relevant claim. For every proposed check, know the claim it covers, the failure signal it can reveal, its expected latency or side effects, and which decision its result could change. Skip it when neither result would change completion or the next action.
 
-Available proof includes direct reproduction, a focused unit or contract check, scoped typecheck or lint, a broader build or regression suite, integration or persisted-state verification, visual inspection, and operational observation. These are alternatives selected by the failure mode, not a ladder to climb or a checklist to complete.
+Available proof includes source traceability, calculation or data spot-checks, constraint and scenario checks, direct reproduction, a focused unit or contract check, scoped typecheck or lint, broader regression, persisted-state verification, visual inspection, human acceptance, and operational observation. These are alternatives selected by the failure mode, not a ladder to climb or a checklist to complete.
 
 Use changed-file or affected-scope lint and typecheck when available. Run a full suite, repository-wide lint or build only when the change crosses shared surfaces, the repository or release contract requires it, a focused check exposes wider uncertainty, or the user explicitly requests that depth. A passing unrelated test is not proof.
 
@@ -18,7 +18,7 @@ For bug fixes, show that the check fails without the fix when feasible. Confirm 
 
 ## Risk overlay
 
-- `routine`: focused proof and final diff review;
+- `routine`: focused proof and final-result inspection;
 - `guarded`: include relevant negative or failure cases; add broader regression, rollback reasoning, or fresh review only where the shared surface or residual uncertainty warrants it;
 - `critical`: test rollback or restore where applicable and feasible, verify relevant invariants/reconciliation, define abort criteria, and stop before external execution for `go/no-go`.
 
@@ -43,6 +43,6 @@ Use `pass@k` only when one successful candidate among several is useful. Use all
 
 ## Review
 
-Review the final diff for correctness, scope, simplicity, security, data safety, tests, documentation, and collateral changes. Prefer the host's native diff-review surface when it directly covers the artifact. Use a genuinely fresh read-only reviewer only when residual uncertainty, blind review, or blast radius justifies the added context. Verify findings before changing code. If fresh review is unavailable, run a separate self-review pass and mark independent review as not validated.
+Inspect the final result for correctness, scope, simplicity, safety, traceability, and collateral changes. When files changed, review the actual diff and prefer the host's native diff-review surface. Use a genuinely fresh read-only reviewer only when residual uncertainty, blind review, or blast radius justifies the added context. Verify findings before revising the deliverable. If fresh review is unavailable, run a separate self-review pass and mark independent review as not validated.
 
 After the same failure twice, stop patching and diagnose. Report unavailable validation with its consequence; do not lower the completion standard silently.

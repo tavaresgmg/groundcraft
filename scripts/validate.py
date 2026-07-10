@@ -169,10 +169,9 @@ def validate_handoff_skill(errors: list[str]) -> None:
 def validate_hooks(errors: list[str]) -> None:
     data = load_json(PLUGIN / "hooks" / "hooks.json", errors)
     hooks = data.get("hooks") if isinstance(data, dict) else None
-    if not isinstance(hooks, dict) or set(hooks) != {"UserPromptSubmit", "SubagentStart"}:
-        errors.append("hooks.json must contain only UserPromptSubmit and SubagentStart")
+    if not isinstance(hooks, dict) or set(hooks) != {"SubagentStart"}:
+        errors.append("hooks.json must contain only SubagentStart")
         return
-    messages: dict[str, str] = {}
     for event, groups in hooks.items():
         if not isinstance(groups, list) or len(groups) != 1:
             errors.append(f"{event} must contain one matcher group")
@@ -197,17 +196,9 @@ def validate_hooks(errors: list[str]) -> None:
             errors.append(f"{event} hook messages must match and mention $groundcraft")
         if not isinstance(handler.get("timeout"), int) or not 1 <= handler["timeout"] <= 10:
             errors.append(f"{event} timeout must be 1-10 seconds")
-        messages[event] = unix.group(1)
-    prompt = messages.get("UserPromptSubmit", "")
-    if not all(word in prompt for word in ("substantial", "tiny", "casual", "translation")):
-        errors.append("UserPromptSubmit must define the activation boundary")
-    if (
-        "$groundcraft-handoff" not in prompt
-        or "unfinished cross-session work" not in prompt
-        or "never per task" not in prompt
-        or "describing a sequence of steps" not in prompt
-    ):
-        errors.append("UserPromptSubmit must keep handoff continuity demand-driven")
+        prompt = unix.group(1)
+        if not all(word in prompt for word in ("delegated", "scope", "authority", "evidence", "uncertainty")):
+            errors.append("SubagentStart must preserve delegated scope, authority, and evidence")
 
 
 def validate_evals(errors: list[str]) -> None:

@@ -16,7 +16,7 @@ The four suites have separate jobs: `regression` protects known behavior, `capab
 
 ## Runner
 
-The runner copies the current skill into a clean Codex home and executes each case in a disposable workspace outside the repository. Writable fixtures receive a fresh Git repository. Hidden reference patches and command oracles are not included in the prompt, and rubrics are written only after execution.
+The runner copies the current skills into a clean Codex home and executes each case ephemerally in a disposable workspace outside the repository. It relies on native implicit skill matching and does not inject plugin hook text as developer instructions. Writable fixtures receive a fresh Git repository. Hidden reference patches and command oracles are not included in the prompt, and rubrics are written only after execution. Native subagent spawning is validated in a real host session rather than claimed from this ephemeral CLI harness.
 
 Each run records the model, plugin source hash, Git commit and status, response trace, workspace state, deterministic oracle result, and pending semantic rubric. This is enough to identify what ran without maintaining a second plugin installer, cross-platform sandbox layer, control experiment, or telemetry system.
 

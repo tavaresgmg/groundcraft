@@ -1,24 +1,12 @@
 {
   "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '%s\\n' 'Apply $groundcraft to substantial work with evidence and proportional validation; resolve product ambiguity first and do not announce the method. Use $groundcraft-handoff only for unfinished cross-session work or when requested, never per task. Stay direct for tiny known-path work, casual chat, simple translation or formatting, stable facts, or free ideation without describing a sequence of steps.'",
-            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to substantial work with evidence and proportional validation; resolve product ambiguity first and do not announce the method. Use $groundcraft-handoff only for unfinished cross-session work or when requested, never per task. Stay direct for tiny known-path work, casual chat, simple translation or formatting, stable facts, or free ideation without describing a sequence of steps.'\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "SubagentStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s\\n' 'Apply $groundcraft to substantial delegated work. Stay within scope, keep domain skills in charge of their procedures, and return evidence rather than confidence.'",
-            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to substantial delegated work. Stay within scope, keep domain skills in charge of their procedures, and return evidence rather than confidence.'\"",
+            "command": "printf '%s\\n' 'Apply $groundcraft to substantial delegated work. Stay within inherited scope and authority, use domain skills for procedure, and return a distilled result with evidence pointers and uncertainty.'",
+            "commandWindows": "powershell.exe -NoProfile -Command \"Write-Output 'Apply $groundcraft to substantial delegated work. Stay within inherited scope and authority, use domain skills for procedure, and return a distilled result with evidence pointers and uncertainty.'\"",
             "timeout": 5
           }
         ]

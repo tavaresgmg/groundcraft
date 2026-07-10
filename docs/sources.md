@@ -33,6 +33,14 @@ These projects informed mechanisms, not a merged command catalog. Groundcraft de
 ## Agents, evaluation, and context
 
 - [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents): begin with the simplest composition that works and add agentic complexity only for measured value.
+- [OpenAI subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents#why-subagent-workflows-help): move independent read-heavy exploration, testing, triage, and summarization off the main thread while keeping write-heavy coordination controlled.
+- [Towards a Science of Scaling Agent Systems](https://arxiv.org/abs/2512.08296) and [MAST](https://arxiv.org/abs/2503.13657): multi-agent gains depend on decomposability and central verification; sequential planning and weak coordination can amplify errors. Both are preprints, not universal thresholds.
+- [Rational Metareasoning for Large Language Models](https://arxiv.org/abs/2410.05563): select extra reasoning by expected value of computation rather than spending a fixed budget on every task.
+- [ReAct](https://openreview.net/forum?id=WE_vluYUL-X): interleave reasoning, action, and observation so plans update when evidence changes.
+- [STORM](https://aclanthology.org/2024.naacl-long.347/) and [ALCE](https://aclanthology.org/2023.emnlp-main.398/): research benefits from distinct perspectives, claim-based synthesis, and separate citation correctness and completeness checks.
+- [LongMemEval](https://arxiv.org/abs/2410.10813): retrieve memory by relevance and time; long raw histories and over-compression can both damage answer support.
+- [PlanBench](https://arxiv.org/abs/2206.10498) and [Tree of Thoughts](https://openreview.net/forum?id=5Xc1ecxO1h): fluent plans are not reliable proof, while branching is useful only for genuinely difficult decisions where its extra cost pays.
+- [τ-bench](https://proceedings.iclr.cc/paper_files/paper/2025/hash/1b126cc38b8638e07bef37e7b2bb72bf-Abstract-Conference.html): evaluate observable end state, policy compliance, and repeated consistency rather than transcript confidence alone.
 - [Anthropic: Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents): high-signal context, just-in-time retrieval, and progressive disclosure.
 - [Anthropic agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents): capability and regression evaluation design.
 - [OpenAI eval best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices): task-specific datasets, typical, edge, and adversarial cases, and human calibration.
@@ -46,7 +54,7 @@ These projects informed mechanisms, not a merged command catalog. Groundcraft de
 ## Platform behavior
 
 - [OpenAI Skills](https://developers.openai.com/codex/concepts/customization#skills): implicit matching, focused descriptions, and progressive disclosure.
-- [OpenAI Hooks](https://developers.openai.com/codex/hooks): plugin hook discovery, trust, supported command hooks, and prompt-context injection.
+- [OpenAI Hooks](https://developers.openai.com/codex/hooks): plugin hook discovery, trust, supported command hooks, and targeted lifecycle injection; Groundcraft keeps only `SubagentStart` so ordinary turns pay no hook prompt cost.
 - [OpenAI AGENTS guidance](https://developers.openai.com/codex/concepts/customization#agents-guidance): keep guidance small, route close to the relevant code, and pair recurring rules with executable checks.
 
 Community discussions were used to discover failure modes such as context bloat, command fatigue, document drift, unnecessary questions, and self-review bias. A representative [practitioner discussion about spec-driven frameworks](https://www.reddit.com/r/ClaudeCode/comments/1t2mym5/are_specdriven_frameworks_like_agent_os_bmad/) informed cases, not normative claims. Normative technical claims remain grounded in primary sources. Vendor sources are useful operational evidence but carry commercial incentives; Groundcraft prefers convergence with standards, peer-reviewed work, source code, and direct tests.

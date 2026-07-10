@@ -1,14 +1,14 @@
 # Groundcraft
 
-Evidence-driven autonomous work and software engineering for Codex.
+Evidence-driven autonomous work for Codex.
 
-Groundcraft gives Codex one adaptive operating method instead of a catalog of commands. It starts automatically for substantial software, research, analysis, decision, review, and operational work; scales process to task type, size, and risk; works autonomously on safe local actions; and stops for human decisions or external consequences.
+Groundcraft gives Codex one adaptive operating method instead of a catalog of commands. It starts automatically for substantial software, research, analysis, planning, decision, artifact, review, and operational work; scales process to task type, size, and risk; works autonomously on safe local actions; and stops for human decisions or external consequences.
 
 It stays lightweight for casual conversation, simple translation or formatting, trivial stable facts, and free ideation. Domain skills remain in charge of their own procedures.
 
 ## What it optimizes
 
-- verified outcomes, not generated code;
+- verified outcomes and useful deliverables, not generated volume;
 - autonomy proportional to reversibility;
 - small coherent changes and evidence worth the user's wait;
 - minimal sufficient context;
@@ -30,19 +30,20 @@ codex plugin marketplace add tavaresgmg/groundcraft
 codex plugin add groundcraft@groundcraft
 ```
 
-Start a new Codex thread after installation. Groundcraft has no required slash commands. Its skill can be chosen implicitly, while a small plugin hook reminds Codex when substantial work should use it and when trivial work should stay direct. Codex requires you to review and trust non-managed hooks through `/hooks` before they run.
+Start a new Codex thread after installation. Groundcraft has no required slash commands and its skill is chosen through native implicit matching. A small `SubagentStart` hook preserves scope, authority, and evidence when Codex delegates work; it adds no prompt text to ordinary user turns. Codex requires you to review and trust non-managed hooks through `/hooks` before they run.
 
-If hooks are disabled or untrusted, the implicit skill remains available and can be invoked explicitly as `$groundcraft`.
+If hooks are disabled or untrusted, the implicit skill and native subagents remain available; only the delegated-work reminder is absent. The skill can also be invoked explicitly as `$groundcraft`.
 
-The plugin also installs `$groundcraft-handoff`. Active work stays in the host's native thread, goal, and plan; the companion skill is used only to resume or persist unfinished cross-session work, or when requested. It stores compact resume records under `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs/` and removes them after completion is proven. Active handoffs never live in the repository or versioned plugin cache. Existing `~/Developer/work/handoffs/` files are migrated before the first handoff operation only when the portable store is empty; conflicting populated stores require manual resolution.
+The plugin also installs `$groundcraft-handoff`. Active work stays in the host's native thread, goal, and plan; the companion skill is used only for explicit cross-thread export, known continuation when native persistence is unavailable, or when requested. It stores compact resume records under `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs/` and removes them after completion is proven. Active handoffs never live in the repository or versioned plugin cache. Existing `~/Developer/work/handoffs/` files are migrated before the first handoff operation only when the portable store is empty; conflicting populated stores require manual resolution.
 
-The handoff companion currently requires a POSIX shell (macOS or Linux). Groundcraft's core skill and activation hooks remain host-neutral.
+The handoff companion currently requires a POSIX shell (macOS or Linux). Groundcraft's core skill and subagent hook remain host-neutral.
 
 ## Structure
 
 ```text
 plugins/groundcraft/              installable Codex plugin
-  skills/groundcraft-handoff/     durable cross-session continuity
+  hooks/hooks.json                delegated-work boundary
+  skills/groundcraft-handoff/     explicit cross-thread continuity
 docs/methodology.md               human-readable method
 docs/sources.md                   source lineage and evidence
 evals/cases.json                  behavioral contract cases
@@ -55,7 +56,7 @@ tests/test_cli.py                 validator and harness CLI regression tests
 
 ## Local development
 
-Use releases as stable checkpoints. During active development, install the current source through a generated local marketplace:
+Every validated `main` change receives the smallest truthful pre-1.0 release; `1.0.0` remains an explicit product decision. During active development and after publishing, keep the current source installed through the generated local marketplace:
 
 ```bash
 python3 scripts/install-local.py
@@ -83,7 +84,7 @@ The runner copies the current skill into a clean Codex home, uses disposable wor
 
 ## Status
 
-Groundcraft is Codex-first. The methodology is host-neutral, but hook enforcement and installation currently target Codex plugins.
+Groundcraft is Codex-first. The methodology is host-neutral, while delegated-work hooks and installation currently target Codex plugins.
 
 ## License
 

@@ -1,6 +1,6 @@
 ---
 name: groundcraft
-description: "MUST use for substantial software, research, analysis, decisions, debugging, review, or operations requiring evidence or controlled execution. Scale rigor to risk. Skip casual chat, simple transformations, stable facts, free ideation, and tiny known-path changes."
+description: "MUST use for substantial evidence-driven research, analysis, decisions, planning, review, artifact, operational, or software work. Use native subagents for independent branches that save wait or isolate noise. Skip simple calculations or transformations, stable facts, free ideation, and tiny known paths."
 ---
 
 # Groundcraft
@@ -9,11 +9,12 @@ Take substantial work from intent to verified outcome. Own the process; do not m
 
 User, repository, and environment instructions override this skill. A specialized skill owns domain procedure and tools; Groundcraft supplies only missing intent, authority, evidence, proof, and delivery controls. Do not duplicate its workflow.
 
-Do not activate for casual conversation, short private rewrites, simple translation or formatting, trivial stable facts, free ideation with no decision, or tiny known-path changes with direct proof. If explicitly invoked for a tiny task, stay direct and do not announce the skill or its process.
+Do not activate for casual conversation, short private rewrites, simple translation, formatting, or calculations from supplied data, trivial stable facts, free ideation with no decision, or tiny known-path changes with direct proof. If explicitly invoked for a tiny task, stay direct and do not announce the skill or its process.
 
 ## Honor the requested intent
 
 - For answer, explain, research, review, audit, or diagnose requests: inspect and report. Do not implement a fix unless the user also asks to change or fix.
+- For plan, organize, or prioritize requests: produce the decision, sequence, gates, and reordering conditions. Do not execute the plan unless asked.
 - For change, build, implement, fix, refactor, or cleanup requests: perform the authorized local implementation and validation.
 - For monitor or wait requests: observe and report without expanding scope.
 
@@ -33,7 +34,7 @@ Access to a system is not authorization to mutate it.
 
 ## Define the contract
 
-Classify the task silently as `answer`, `research`, `decision`, `diagnosis`, `change`, `review`, or `operation`.
+Classify the task silently as `answer`, `research`, `decision`, `diagnosis`, `change`, `review`, or `operation`. Map analysis to `answer` when explanatory or `decision` when recommending. Map planning to `decision` unless execution is also authorized.
 
 - **Ready:** intent, authority, constraints, and an observable completion signal are known well enough for the next safe step.
 - **Done:** the requested outcome is observed, relevant regressions are absent, authority and constraints were respected, cleanup is complete, and uncertainty is explicit. Use `done_with_concerns` only when the proven outcome has a non-blocking limitation.
@@ -49,7 +50,7 @@ Choose one size and one risk. Reclassify when evidence changes. Never ask the us
 ### Size
 
 - `tiny`: known path, one behavior, direct proof, no persistent plan;
-- `standard`: investigation or several components, but one coherent session and patch;
+- `standard`: investigation or several components, but one coherent session and deliverable;
 - `large`: multiple systems, sessions, or independently verifiable slices.
 
 ### Risk
@@ -62,9 +63,11 @@ Classify the intended action, not merely the subject. For `critical`, prepare au
 
 ## Stay proportional
 
-- `tiny`: act directly, use the obvious focused proof, review the narrow result, and close briefly. Do not announce classification, skill, reference loading, or a multi-step plan; keep any host-required update to one short sentence about the immediate action, not a sequence.
+- `tiny`: act directly, use the obvious focused proof, review the narrow result, and close briefly. Do not load references, browse, delegate, or create a plan when supplied data or one direct check resolves the task. Keep any host-required update to one short sentence about the immediate action, not a sequence.
 - `standard`: keep a short internal plan and update the user only when evidence, understanding, or risk changes.
 - `large`: work in verified slices and maintain a compact continuity capsule.
+
+For `standard` or `large` work, use native subagents when two or more independent read-heavy branches, a specialist boundary, a noisy artifact, or a fresh review can reduce wait or error more than coordination costs. Keep serial, tightly shared-context, tiny, and conflicting write work with the parent.
 
 Validation is not a checklist. Start with the cheapest direct check that can falsify the relevant claim. Do not run full suites, repository-wide lint or builds, repeated renders, or extra exports by default; escalate only when risk, change spread, a failed focused check, a repository or release contract, or the user's requested depth makes that evidence necessary.
 
@@ -88,7 +91,7 @@ If intent or a material product choice is unresolved, load only [decisions.md](r
 - Read [delivery.md](references/delivery.md) for commit, synchronization, push, PR, release, deployment, external communication, or non-trivial cleanup.
 
 Stop reading a reference when its decision is complete; retain only the decision and its proof.
-Never announce Groundcraft, internal classification, or reference loading. Lead with the recommendation or outcome, not method narration; communicate only evidence, decisions, material progress, and gates.
+Do not expose internal classification or reference loading. When the host requires skill disclosure, keep it to one short clause attached to a material action. Lead final results with the recommendation or outcome, not workflow narration.
 
 ## Adaptive loop
 
@@ -97,9 +100,9 @@ Skip steps that add no evidence. Return to an earlier step when evidence invalid
 1. **Ground:** identify intent, done, constraints, users, size, risk, and authority. Resolve a material product choice before loading implementation procedure; if a safe reversible default exists, recommend it and ask only what can reverse it.
 2. **Trace:** inspect the real execution path and local evidence; research external facts only when needed. Choose the next observation by decision value relative to user wait, tokens, and tool cost.
 3. **Shape:** recommend one path, define coherent slices, proof, rollback or mitigation when applicable, and any human gate.
-4. **Build:** produce the answer, artifact, or smallest coherent root-cause change; use one writer per worktree.
-5. **Prove:** validate close to the risk and review the final diff; use fresh adversarial context when justified.
-6. **Land:** integrate, clean up, communicate evidence and risk, and persist only necessary state.
+4. **Build:** produce the answer, artifact, plan, or smallest coherent root-cause change; use one writer per worktree when files change.
+5. **Prove:** validate close to the risk and inspect the final result; review a diff only when one exists, and use fresh adversarial context when justified.
+6. **Land:** deliver or integrate as applicable, clean up, communicate evidence and risk, and persist only necessary state.
 
 ## Authority
 

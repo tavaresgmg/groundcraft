@@ -1,7 +1,7 @@
 {
   "name": "groundcraft",
-  "version": "0.4.0",
-  "description": "Evidence-driven autonomous work and software engineering for Codex.",
+  "version": "0.4.1",
+  "description": "Evidence-driven research, planning, engineering, review, and operations for Codex.",
   "author": {
     "name": "Guilherme Tavares",
     "url": "https://github.com/tavaresgmg"
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Groundcraft",
     "shortDescription": "Evidence-driven autonomous work.",
-    "longDescription": "Groundcraft takes substantial work from intent through research, production, proof, and delivery while scaling process to task type, size, and risk.",
+    "longDescription": "Groundcraft takes substantial work from intent through research, planning, production, proof, and delivery while scaling process to task type, size, and risk.",
     "developerName": "Guilherme Tavares",
     "category": "Developer Tools",
     "capabilities": [

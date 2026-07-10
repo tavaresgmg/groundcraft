@@ -1,6 +1,6 @@
 ---
 name: groundcraft-handoff
-description: "Persist or resume unfinished cross-session Groundcraft work. Use only for explicit handoff operations or known continuation; never scan it per task or use it for completed work."
+description: "Persist or resume unfinished Groundcraft work only for explicit cross-thread handoff or when native thread continuity is unavailable. Never scan it per task or use it for completed work."
 ---
 
 # Groundcraft Handoff
@@ -16,7 +16,7 @@ Preserve only the context needed to resume unfinished work without reconstructin
 
 ## Start or resume
 
-1. When the user resumes prior work, mentions a handoff, or the current task is known to continue unfinished cross-session work, run `scripts/handoffs --migrate-legacy`. This validates and lists the portable store.
+1. When the user requests a handoff, resumes exported work, or native thread continuity is unavailable for known unfinished work, run `scripts/handoffs --migrate-legacy`. This validates and lists the portable store.
 2. Read only handoffs that match the current workspace and objective. If one matches, propose resuming it before starting duplicate work.
 3. Do not surface unrelated pending or stale work unless it creates a concrete collision, dependency, or authority risk.
 4. Surface a relevant `ALERTA` immediately.

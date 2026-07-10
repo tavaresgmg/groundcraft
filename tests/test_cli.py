@@ -75,7 +75,7 @@ class ValidationCliTest(unittest.TestCase):
 
     def test_effectful_hook_is_rejected(self) -> None:
         hooks = json.loads((ROOT / "plugins/groundcraft/hooks/hooks.json").read_text(encoding="utf-8"))
-        hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"] = "touch /tmp/owned"
+        hooks["hooks"]["SubagentStart"][0]["hooks"][0]["command"] = "touch /tmp/owned"
         with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
             plugin = Path(directory)
             (plugin / "hooks").mkdir()
@@ -122,6 +122,12 @@ class EvalCliTest(unittest.TestCase):
             "input_tokens": 120, "cached_input_tokens": 80, "uncached_input_tokens": 40,
             "output_tokens": 12, "reasoning_output_tokens": 4,
         }))
+
+    def test_codex_command_uses_native_skill_matching_without_hook_injection(self) -> None:
+        case = next(case for case in self.catalog["cases"] if case["id"] == "four-day-week-research")
+        command = self.runner.codex_command(case, Path("/tmp/groundcraft-eval"), "test-model")
+        self.assertIn("--ephemeral", command)
+        self.assertNotIn("developer_instructions", " ".join(command))
 
     def test_local_marketplace_staging_keeps_source_unchanged(self) -> None:
         installer = load_module("groundcraft_install_local", "scripts/install-local.py")

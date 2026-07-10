@@ -7,8 +7,9 @@ Define acceptance before producing the result. Prefer observable outcomes over p
 - **Answer or explanation:** answer the actual question; distinguish fact, inference, and unknown; use a source or direct evidence when the claim is current, disputed, unfamiliar, or high-stakes.
 - **Research:** delimit the decision; use current primary sources; cover material contradiction; connect each material claim to evidence; state scope, date, and limits.
 - **Decision:** expose assumptions and constraints; compare real alternatives only when trade-offs matter; test the recommendation adversarially; choose one path and state what would falsify it.
+- **Analysis or planning:** map it to answer or decision; calculate or trace inputs, expose dependencies and gates, order by decision value, and state what would reorder the result.
 - **Diagnosis:** reproduce or correlate the symptom; discriminate among plausible causes; identify the causal mechanism; prove the fix or finding against the original failure.
-- **Change:** observe intended behavior; protect relevant existing behavior; review the final diff; remove incidental residue; update affected existing documentation.
+- **Change or artifact:** observe the requested outcome; protect relevant constraints and prior behavior; inspect the final deliverable; remove incidental residue; update affected documentation when applicable.
 - **Review:** inspect the actual artifact and constraints; report only evidence-backed findings, prioritized by consequence; do not invent quota findings or mutate unless asked.
 - **Operation:** observe target state and side effects; make retries safe; define rollback or mitigation when relevant; gate external, destructive, or irreversible execution.
 
@@ -19,7 +20,7 @@ Use only the surfaces the task needs:
 1. **Outcome:** the requested state or behavior exists.
 2. **Non-regression:** relevant existing behavior still holds.
 3. **Safety:** boundaries, failure paths, authority, and invariants hold.
-4. **Delivery:** the reviewed artifact is the artifact integrated or released, with provenance when required.
+4. **Delivery:** the reviewed deliverable is the one delivered, published, integrated, or released, with provenance when required.
 
 ## Completion states
 

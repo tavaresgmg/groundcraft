@@ -112,15 +112,6 @@ def evaluation_prompt(case: dict[str, object]) -> str:
     return f"{lead}Handle this request as you would for the user. {boundary}\n\n{case['prompt']}"
 
 
-def hook_prompt() -> str:
-    hooks = json.loads((PLUGIN / "hooks" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
-    command = hooks["UserPromptSubmit"][0]["hooks"][0]["command"]
-    match = re.fullmatch(r"printf '%s\\n' '([^'\r\n]+)'", command)
-    if not match:
-        raise SystemExit("UserPromptSubmit hook must be one inert printf statement")
-    return match.group(1)
-
-
 def install_skills(home: Path) -> None:
     target = home / ".agents" / "skills"
     target.mkdir(parents=True)
@@ -148,8 +139,7 @@ def codex_command(case: dict[str, object], workspace: Path, model: str) -> list[
     command = [
         "codex", "exec", "--ephemeral", "--ignore-user-config", "--sandbox", str(case["sandbox"]),
         "--skip-git-repo-check", "--json", "--color", "never", "-C", str(workspace),
-        "-c", f"developer_instructions={json.dumps(hook_prompt())}", "--model", model,
-        evaluation_prompt(case),
+        "--model", model, evaluation_prompt(case),
     ]
     return command
 

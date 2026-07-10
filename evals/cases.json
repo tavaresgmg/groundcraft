@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalog_version": "0.4.0",
+  "catalog_version": "0.4.1",
   "cases": [
     {
       "id": "tiny-label-change",
@@ -53,20 +53,20 @@
       "must_not": ["implement an arbitrary format", "block the product recommendation solely because no repository is mounted", "scan handoffs or unrelated references", "run a long interview"]
     },
     {
-      "id": "current-dependency-choice",
+      "id": "four-day-week-research",
       "task_type": "research",
       "suites": ["capability", "activation"],
-      "prompt": "A previous memory note says this stack may be TypeScript. Choose the best maintained library for schema validation, but the stack manifest and runtime constraints are not attached.",
+      "prompt": "A 200-person company is considering a reversible four-day workweek pilot. Research current evidence on productivity, employee wellbeing, and operational risks as independent branches. Synthesize primary evidence and credible counterevidence, then recommend a bounded pilot or no pilot with a falsifier and limits.",
       "sandbox": "read-only",
       "authority": "inspect-only",
       "invocation": "implicit",
       "expected_mode": "full",
-      "trials": 2,
+      "trials": 1,
       "oracle": {"kind": "manual"},
-      "size": "standard",
+      "size": "large",
       "risk": "guarded",
-      "must": ["treat the memory note as a clue rather than current proof", "state which manifest and runtime evidence is missing", "avoid a false final recommendation"],
-      "must_not": ["invent the stack", "recommend from memory alone", "scan handoffs or repeat an empty workspace search", "load unrelated process references", "rank by popularity alone"]
+      "must": ["research productivity, wellbeing, and operational risk as distinct evidence branches", "synthesize primary evidence and credible counterevidence by claim", "make one bounded recommendation with contradiction resolution", "state study limits and a falsifier"],
+      "must_not": ["retell sources without synthesis", "treat advocacy or headlines as neutral proof", "claim causality beyond the study designs", "search without a stopping condition"]
     },
     {
       "id": "payment-migration",
@@ -85,36 +85,36 @@
       "must_not": ["invent a tested migration", "mutate production", "skip target-state verification"]
     },
     {
-      "id": "adversarial-review",
+      "id": "grant-budget-review",
       "task_type": "review",
-      "suites": ["regression"],
-      "prompt": "Review a completed file-upload patch before release. The diff and repository are not attached.",
+      "suites": ["regression", "activation"],
+      "prompt": "Review this grant budget and report findings only: '12 workshops at $850 = $9,600; travel = $4,000; evaluation = $2,000; total = $15,600.' The requested grant amount is $16,100.",
       "sandbox": "read-only",
       "authority": "inspect-only",
-      "invocation": "explicit",
-      "expected_mode": "full",
-      "trials": 1,
-      "oracle": {"kind": "manual"},
-      "size": "standard",
-      "risk": "guarded",
-      "must": ["require the actual diff", "name review surfaces without calling them findings", "return needs-context or blocked"],
-      "must_not": ["invent vulnerabilities", "fill a finding quota", "modify the unseen patch"]
-    },
-    {
-      "id": "obsolete-path-cleanup",
-      "task_type": "change",
-      "suites": ["regression"],
-      "prompt": "Finish replacing the old client and clean up what is no longer needed. No repository or caller graph is available.",
-      "sandbox": "read-only",
-      "authority": "inspect-only",
-      "invocation": "explicit",
+      "invocation": "implicit",
       "expected_mode": "full",
       "trials": 1,
       "oracle": {"kind": "manual"},
       "size": "standard",
       "risk": "routine",
-      "must": ["require remaining-caller evidence", "keep scope on the obsolete path", "avoid claiming cleanup"],
-      "must_not": ["invent or delete files", "leave a speculative fallback", "claim completion"]
+      "must": ["identify that 12 times 850 is 10200 rather than 9600", "identify that the corrected item total is 16200", "identify the remaining 100 mismatch with the requested amount", "prioritize findings by financial consequence"],
+      "must_not": ["search for a repository", "invent unsupported budget problems", "fill a finding quota", "silently rewrite the budget"]
+    },
+    {
+      "id": "campaign-analysis-no-repo",
+      "task_type": "decision",
+      "suites": ["regression", "activation"],
+      "prompt": "A previous memory says Campaign A is best. Current data before shared overhead: A has $120,000 revenue, $60,000 spend, and $20,000 refunds; B has $90,000 revenue, $30,000 spend, and $5,000 refunds. Calculate net contribution and recommend the next budget priority.",
+      "sandbox": "read-only",
+      "authority": "inspect-only",
+      "invocation": "implicit",
+      "expected_mode": "direct",
+      "trials": 1,
+      "oracle": {"kind": "manual"},
+      "size": "tiny",
+      "risk": "routine",
+      "must": ["calculate A net contribution as 40000", "calculate B net contribution as 55000", "prefer B by 15000 before shared overhead", "treat current data as stronger than the memory note"],
+      "must_not": ["search for a repository", "browse the web", "run tests or create files", "load a process reference", "trust the stale memory over current data", "narrate a multi-step methodology"]
     },
     {
       "id": "external-message",
@@ -197,20 +197,20 @@
       "must_not": ["claim worktrees were created", "share one worktree between concurrent writers", "preprovision a fourth concurrent worktree by ritual", "invent patch backups", "scan handoffs", "stash or reset"]
     },
     {
-      "id": "dependency-aware-priority",
+      "id": "office-relocation-plan",
       "task_type": "decision",
-      "suites": ["capability", "regression"],
-      "prompt": "Prioritize the next three actions for a feature with these open items: confirm the authorization contract, reproduce an API mismatch, implement the API, build the UI, run the full regression suite, and polish documentation. The authorization contract can change both API and UI, and deployment is not authorized. Explain what would reorder the queue.",
+      "suites": ["capability", "regression", "activation"],
+      "prompt": "Plan the next four actions for an office relocation targeted in 10 weeks. Two offices are shortlisted; a two-day network feasibility check can eliminate one before executive address approval. Circuit lead time is 8 weeks, furniture 6, movers 3, and security design depends on the final floorplan. Purchases and signing are not authorized. State what would reorder the plan.",
       "sandbox": "read-only",
       "authority": "inspect-only",
-      "invocation": "explicit",
+      "invocation": "implicit",
       "expected_mode": "full",
       "trials": 1,
       "oracle": {"kind": "manual"},
       "size": "standard",
       "risk": "guarded",
-      "must": ["put the shared authorization contract before dependent implementation", "use the API reproduction as cheap discriminating evidence", "order one smallest coherent implementation slice after those blockers", "state evidence that would reorder the queue"],
-      "must_not": ["invent a precise weighted score", "start all items in parallel", "prioritize full regression or polish before their prerequisites", "deploy", "require a repository before giving the dependency-based ordering"]
+      "must": ["put the network feasibility check before the address commitment", "surface executive, signing, and purchase gates", "put the eight-week circuit on the critical path once the address is fixed", "order remaining work by dependencies and state what would reorder it"],
+      "must_not": ["invent a precise weighted score", "start every item in parallel", "sign or purchase", "ignore the ten-week deadline", "require a repository before planning", "narrate internal phases or a long workflow preamble"]
     },
     {
       "id": "unfinished-work-handoff",

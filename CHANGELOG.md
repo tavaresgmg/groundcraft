@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+## 0.4.1 - 2026-07-10
+
 - Added a one-command local development install that keeps cachebusters and generated marketplace state outside the repository.
 - Added cached, uncached, output, and reasoning token usage to behavioral evaluation results and summaries.
+- Removed the per-prompt activation hook after implicit skill matching passed both a trivial and a substantial A/B case; ordinary turns now pay no Groundcraft hook cost.
+- Preferred native subagents for independent evidence branches, specialist boundaries, noisy inputs, and justified fresh review while keeping synthesis and authority with the parent.
+- Generalized planning, analysis, artifact review, proof, and delivery language so non-software work does not trigger repository, diff, or test ceremony.
+- Replaced weak missing-context cases with behavioral coverage for multi-branch research, financial analysis, budget review, and dependency-aware operational planning.
 
 ## 0.4.0 - 2026-07-10
 
