@@ -100,7 +100,9 @@ Repository conventions win. Inspect status, diff, branch, remote, upstream, dive
 
 ## Proof and failure discipline
 
-Proof has four possible surfaces: requested outcome, relevant non-regression, safety and authority boundaries, and delivery of the exact reviewed artifact. Use only the surfaces the task needs. Self-review is triage, not an independent oracle.
+Proof has four possible surfaces: requested outcome, relevant non-regression, safety and authority boundaries, and delivery of the exact reviewed artifact. Use only the surfaces the task needs. Each check must target a claim and earn its latency with information that could change completion or the next action. Start focused and stop when required proof is sufficient; full suites, repository-wide lint or builds, repeated renders, and extra exports are escalation tools, not defaults. Running them asynchronously keeps the session responsive but does not remove the user's wait.
+
+Visual proof is required when visible behavior is the risk or a specialized workflow requires it. Prefer a live view to a new export and inspect after the final visual-affecting change. Mechanical properties can be checked by the agent; subjective approval belongs to the user, and a user who prefers to inspect the result should receive one final state rather than repeated renders or variants. Self-review is triage, not an independent oracle.
 
 Completion states are `done`, `done_with_concerns`, `blocked`, and `failed`. A result cannot silently turn unavailable validation into success. Groundcraft classifies failures by origin and escape point: intent, context, reasoning, tool protocol, target state, implementation, oracle, gaming or contamination, environment, verification, authority, and delivery. The response is a better observation, boundary check, fixture, or deterministic regression—not automatically more prompt text.
 

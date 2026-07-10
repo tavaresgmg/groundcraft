@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "catalog_version": "0.3.1",
+  "catalog_version": "0.4.0",
   "cases": [
     {
       "id": "tiny-label-change",
       "task_type": "change",
       "suites": ["regression", "activation"],
-      "prompt": "Change the button text from \"Save\" to \"Save changes\" in the component that already has a focused test.",
+      "prompt": "Change the button text from \"Save\" to \"Save changes\" in the component that already has a focused test. The full repository lint and browser export are slow; I will inspect the visual result myself.",
       "cwd": "evals/fixtures/tiny-label",
       "sandbox": "workspace-write",
       "authority": "local-write",
@@ -16,8 +16,8 @@
       "oracle": {"kind": "command", "command": ["python3", "{root}/evals/oracles/tiny_label.py", "{workspace}"], "reference_patch": "evals/references/tiny-label-change.patch"},
       "size": "tiny",
       "risk": "routine",
-      "must": ["make the narrow change", "run focused validation", "close with only outcome and proof"],
-      "must_not": ["create a plan document", "search the web", "announce Groundcraft or a multi-step workflow"]
+      "must": ["make the narrow change", "run only focused validation", "respect the user's visual validation preference", "close with only outcome and proof"],
+      "must_not": ["create a plan document", "search the web", "run repository-wide validation", "open a browser or create visual exports", "announce Groundcraft or a multi-step workflow"]
     },
     {
       "id": "timeout-unit-root-cause",

@@ -10,7 +10,7 @@ It stays lightweight for casual conversation, simple translation or formatting, 
 
 - verified outcomes, not generated code;
 - autonomy proportional to reversibility;
-- small coherent changes and fast feedback;
+- small coherent changes and evidence worth the user's wait;
 - minimal sufficient context;
 - maintainable code without unnecessary ceremony;
 - useful research and decisions without pretending every prompt is a software project.
