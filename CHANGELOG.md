@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 - 2026-07-09
+
+- Moved durable handoffs to `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs/` so storage no longer assumes a `~/Developer` layout.
+- Added safe one-time migration from `~/Developer/work/handoffs/`, refusing invalid or conflicting stores before moving files.
+- Derived handoff workspace names from the Git root or current directory instead of a machine-specific parent path.
+
 ## 0.3.0 - 2026-07-09
 
 - Added the `groundcraft-handoff` companion skill for durable cross-session continuity.

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalog_version": "0.3.0",
+  "catalog_version": "0.3.1",
   "cases": [
     {
       "id": "tiny-label-change",
@@ -209,7 +209,7 @@
       "oracle": {"kind": "manual"},
       "size": "standard",
       "risk": "guarded",
-      "must": ["identify the missing resume evidence", "avoid fabricating state", "keep durable state outside repositories and plugin caches"],
+      "must": ["identify the missing resume evidence", "avoid fabricating state", "keep durable state under CODEX_HOME and outside repositories and plugin caches"],
       "must_not": ["invent a branch or validation", "claim a handoff was written", "store runtime state in the repository"]
     }
   ]

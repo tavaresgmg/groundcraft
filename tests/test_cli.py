@@ -155,11 +155,21 @@ class EvalCliTest(unittest.TestCase):
 
 class HandoffCliTest(unittest.TestCase):
     def handoff_store(self, home: Path) -> Path:
+        return home / ".codex" / "groundcraft" / "handoffs"
+
+    def legacy_handoff_store(self, home: Path) -> Path:
         return home / "Developer" / "work" / "handoffs"
 
-    def run_handoffs(self, home: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+    def run_handoffs(
+        self, home: Path, *arguments: str, codex_home: Path | None = None, path_prefix: Path | None = None
+    ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment["HOME"] = str(home)
+        environment.pop("CODEX_HOME", None)
+        if codex_home is not None:
+            environment["CODEX_HOME"] = str(codex_home)
+        if path_prefix is not None:
+            environment["PATH"] = f"{path_prefix}{os.pathsep}{environment['PATH']}"
         return subprocess.run(
             [str(HANDOFF_SCRIPT), *arguments], capture_output=True, text=True, check=False, env=environment
         )
@@ -220,10 +230,10 @@ The handoff is a test fixture.
         self.assertIn("next: Run python3 -m unittest discover -s tests.", updated.stdout)
         self.assertNotIn("groundcraft-continuity", closed.stdout)
 
-    def test_legacy_handoff_remains_readable_during_migration(self) -> None:
+    def test_legacy_handoff_is_migrated_once_then_remains_readable(self) -> None:
         with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
             home = Path(directory) / "home"
-            store = self.handoff_store(home)
+            store = self.legacy_handoff_store(home)
             store.mkdir(parents=True)
             (store / "groundcraft-legacy-task.md").write_text(
                 """# Resume a legacy task
@@ -235,12 +245,101 @@ The task is verified.
 
 ## Próximo passo
 Inspect the current state.
-""",
+                """,
                 encoding="utf-8",
             )
-            completed = self.run_handoffs(home)
+            original = store / "groundcraft-legacy-task.md"
+            old = original.stat().st_mtime - 8 * 86400
+            os.utime(original, (old, old))
+            completed = self.run_handoffs(home, "--migrate-legacy")
+            repeated = self.run_handoffs(home, "--migrate-legacy")
+            self.assertEqual(completed.returncode, 0, completed.stdout)
+            self.assertIn("Migrated 1 handoff(s)", completed.stdout)
+            self.assertIn("groundcraft-legacy-task - Resume a legacy task", completed.stdout)
+            self.assertFalse(store.exists())
+            migrated = self.handoff_store(home) / "groundcraft-legacy-task.md"
+            self.assertTrue(migrated.is_file())
+            self.assertEqual(int(migrated.stat().st_mtime), int(old))
+            self.assertEqual(repeated.returncode, 0, repeated.stdout)
+            self.assertNotIn("Migrated", repeated.stdout)
+
+    def test_custom_codex_home_controls_the_portable_store(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            home = root / "home"
+            codex_home = root / "shared-codex"
+            self.write_handoff(codex_home / "groundcraft" / "handoffs")
+            completed = self.run_handoffs(home, "groundcraft", codex_home=codex_home)
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("groundcraft-legacy-task - Resume a legacy task", completed.stdout)
+        self.assertIn("groundcraft-continuity", completed.stdout)
+
+    def test_migration_rejects_invalid_legacy_store_without_moving_files(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            legacy = self.legacy_handoff_store(home)
+            path = self.write_handoff(legacy)
+            (legacy / "unexpected.txt").write_text("invalid", encoding="utf-8")
+            completed = self.run_handoffs(home, "--migrate-legacy")
+            self.assertEqual(completed.returncode, 1, completed.stdout)
+            self.assertIn("migration was not performed", completed.stdout)
+            self.assertTrue(path.is_file())
+            self.assertFalse(self.handoff_store(home).exists())
+
+    def test_migration_rejects_double_dot_hidden_legacy_entry(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            legacy = self.legacy_handoff_store(home)
+            self.write_handoff(legacy)
+            (legacy / "..backup.md").write_text("unexpected", encoding="utf-8")
+            completed = self.run_handoffs(home, "--migrate-legacy")
+            self.assertEqual(completed.returncode, 1, completed.stdout)
+            self.assertIn("ALERTA: ..backup.md", completed.stdout)
+            self.assertTrue((legacy / "..backup.md").is_file())
+            self.assertFalse(self.handoff_store(home).exists())
+
+    def test_migration_lock_prevents_a_second_migrator(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            legacy_path = self.write_handoff(self.legacy_handoff_store(home))
+            lock = home / ".codex" / "groundcraft" / ".handoffs-migration.lock"
+            lock.mkdir(parents=True)
+            completed = self.run_handoffs(home, "--migrate-legacy")
+            self.assertEqual(completed.returncode, 1, completed.stdout)
+            self.assertIn("another handoff migration is running", completed.stdout)
+            self.assertTrue(legacy_path.is_file())
+            self.assertFalse(self.handoff_store(home).exists())
+
+    def test_concurrent_destination_writer_is_not_overwritten(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            home = root / "home"
+            self.write_handoff(self.legacy_handoff_store(home))
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_ln = fake_bin / "ln"
+            fake_ln.write_text(
+                "#!/bin/sh\nprintf '%s\\n' 'concurrent writer' > \"$2\"\nexit 1\n",
+                encoding="utf-8",
+            )
+            fake_ln.chmod(0o755)
+            completed = self.run_handoffs(home, "--migrate-legacy", path_prefix=fake_bin)
+            target = self.handoff_store(home) / "groundcraft-continuity.md"
+            staging = home / "Developer" / "work" / ".groundcraft-handoffs-migration"
+            self.assertEqual(completed.returncode, 1, completed.stdout)
+            self.assertIn("destination handoff groundcraft-continuity.md appeared", completed.stdout)
+            self.assertEqual(target.read_text(encoding="utf-8"), "concurrent writer\n")
+            self.assertTrue((staging / "groundcraft-continuity.md").is_file())
+
+    def test_migration_rejects_two_populated_stores_without_merging(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            legacy_path = self.write_handoff(self.legacy_handoff_store(home), "legacy-open-task")
+            portable_path = self.write_handoff(self.handoff_store(home), "portable-open-task")
+            completed = self.run_handoffs(home, "--migrate-legacy")
+            self.assertEqual(completed.returncode, 1, completed.stdout)
+            self.assertIn("both legacy and portable handoff stores contain files", completed.stdout)
+            self.assertTrue(legacy_path.is_file())
+            self.assertTrue(portable_path.is_file())
 
     def test_invalid_file_fails_the_whole_store_even_when_filtered_out(self) -> None:
         with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
@@ -274,6 +373,18 @@ Inspect the current state.
             completed = self.run_handoffs(home)
         self.assertEqual(completed.returncode, 1)
         self.assertIn("durable handoff directory must not be a symlink", completed.stdout)
+
+    def test_symlinked_entry_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            home = root / "home"
+            store = self.handoff_store(home)
+            target = self.write_handoff(root / "outside")
+            store.mkdir(parents=True)
+            (store / "groundcraft-linked-task.md").symlink_to(target)
+            completed = self.run_handoffs(home)
+        self.assertEqual(completed.returncode, 1)
+        self.assertIn("symlinked entries are not allowed", completed.stdout)
 
 
 if __name__ == "__main__":

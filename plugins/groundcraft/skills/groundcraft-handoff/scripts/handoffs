@@ -1,60 +1,198 @@
 #!/bin/sh
-# Validate and list durable Groundcraft handoffs.
-# Usage: handoffs [workspace]
+# Validate, migrate, and list durable Groundcraft handoffs.
+# Usage: handoffs [workspace | --migrate-legacy]
 
-DIR="$HOME/Developer/work/handoffs"
-FILTER="${1:-}"
+CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}"
+DIR="$CODEX_ROOT/groundcraft/handoffs"
+LEGACY_DIR="$HOME/Developer/work/handoffs"
+STAGING_DIR="$HOME/Developer/work/.groundcraft-handoffs-migration"
+LOCK_DIR="$CODEX_ROOT/groundcraft/.handoffs-migration.lock"
+FILTER=""
+MIGRATE=0
+
+case "${1:-}" in
+  "") ;;
+  --migrate-legacy) MIGRATE=1 ;;
+  --*)
+    echo "Usage: handoffs [workspace | --migrate-legacy]"
+    exit 2
+    ;;
+  *) FILTER=$1 ;;
+esac
+
+if [ "$#" -gt 1 ]; then
+  echo "Usage: handoffs [workspace | --migrate-legacy]"
+  exit 2
+fi
+
+validate_store() {
+  store=$1
+  validated_count=0
+
+  [ -d "$store" ] || return
+
+  for file in "$store"/* "$store"/.[!.]* "$store"/..?*; do
+    [ -e "$file" ] || continue
+    base=$(basename "$file")
+
+    if [ -L "$file" ]; then
+      echo "ALERTA: $base - symlinked entries are not allowed in $store"
+      problems=$((problems + 1))
+      continue
+    fi
+
+    if [ -d "$file" ]; then
+      echo "ALERTA: $base/ - subdirectories are not allowed in $store"
+      problems=$((problems + 1))
+      continue
+    fi
+
+    case "$base" in
+      *.md) ;;
+      *)
+        echo "ALERTA: $base - only .md files are allowed in $store"
+        problems=$((problems + 1))
+        continue
+        ;;
+    esac
+
+    validated_count=$((validated_count + 1))
+    name=${base%.md}
+    if ! printf '%s' "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)+$'; then
+      echo "ALERTA: $base - expected <workspace>-<slug>.md in lowercase ASCII kebab-case"
+      problems=$((problems + 1))
+    fi
+
+    missing=""
+    grep -q '^# ' "$file" || missing="$missing title"
+    grep -q '^## Pronto quando$' "$file" || missing="$missing [Pronto quando]"
+    grep -q '^## Próximo passo$' "$file" || missing="$missing [Próximo passo]"
+    grep -Eq 'atualizado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$file" || missing="$missing [atualizado]"
+
+    if [ -n "$missing" ]; then
+      echo "ALERTA: $base - missing or invalid:$missing"
+      problems=$((problems + 1))
+    fi
+  done
+}
 
 if [ -L "$DIR" ]; then
   echo "ALERTA: $DIR - durable handoff directory must not be a symlink"
   exit 1
 fi
 
-if [ ! -d "$DIR" ]; then
-  echo "0 handoffs pending"
-  exit 0
+if [ "$MIGRATE" -eq 0 ] && { [ -d "$LOCK_DIR" ] || [ -e "$STAGING_DIR" ] || [ -L "$STAGING_DIR" ]; }; then
+  echo "ALERTA: handoff migration is active or incomplete; do not read or write the store"
+  exit 1
+fi
+
+if [ "$MIGRATE" -eq 1 ]; then
+  if [ -L "$LEGACY_DIR" ]; then
+    echo "ALERTA: $LEGACY_DIR - legacy handoff directory must not be a symlink"
+    exit 1
+  fi
+
+  mkdir -p "$CODEX_ROOT/groundcraft" || exit 1
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "ALERTA: another handoff migration is running or left $LOCK_DIR; migration was not performed"
+    exit 1
+  fi
+  release_lock() {
+    rmdir "$LOCK_DIR" 2>/dev/null || true
+  }
+  trap release_lock 0
+  trap 'exit 1' 1 2 3 15
+
+  if [ -e "$STAGING_DIR" ] || [ -L "$STAGING_DIR" ]; then
+    echo "ALERTA: incomplete migration staging exists at $STAGING_DIR; migration was not performed"
+    exit 1
+  fi
+
+  problems=0
+  validate_store "$LEGACY_DIR"
+  legacy_count=$validated_count
+  validate_store "$DIR"
+  destination_count=$validated_count
+
+  if [ "$problems" -gt 0 ]; then
+    echo "$problems handoff problem(s) require attention; migration was not performed"
+    exit 1
+  fi
+
+  if [ "$legacy_count" -gt 0 ] && [ "$destination_count" -gt 0 ]; then
+    echo "ALERTA: both legacy and portable handoff stores contain files; migration was not performed"
+    exit 1
+  fi
+
+  if [ "$legacy_count" -gt 0 ]; then
+    if ! mv "$LEGACY_DIR" "$STAGING_DIR"; then
+      echo "ALERTA: failed to isolate the legacy store; migration was not performed"
+      exit 1
+    fi
+
+    problems=0
+    validate_store "$STAGING_DIR"
+    staged_count=$validated_count
+    validate_store "$DIR"
+    destination_count=$validated_count
+    if [ "$problems" -gt 0 ] || [ "$destination_count" -gt 0 ]; then
+      if [ ! -e "$LEGACY_DIR" ] && [ ! -L "$LEGACY_DIR" ]; then
+        mv "$STAGING_DIR" "$LEGACY_DIR" || true
+      fi
+      echo "ALERTA: stores changed while migration started; migration was not performed"
+      exit 1
+    fi
+
+    mkdir -p "$DIR" || exit 1
+    for file in "$STAGING_DIR"/*.md; do
+      [ -e "$file" ] || continue
+      base=$(basename "$file")
+      target="$DIR/$base"
+      temporary="$DIR/.handoff-migration-$base.$$"
+      if [ -e "$temporary" ] || [ -L "$temporary" ] || ! (set -C; : > "$temporary") 2>/dev/null; then
+        echo "ALERTA: failed to reserve temporary storage for $base; snapshot remains at $STAGING_DIR"
+        exit 1
+      fi
+      if ! cp -p "$file" "$temporary" || ! cmp -s "$file" "$temporary"; then
+        echo "ALERTA: failed to copy and verify $base; snapshot remains at $STAGING_DIR"
+        exit 1
+      fi
+      if ! ln "$temporary" "$target" 2>/dev/null; then
+        rm "$temporary" 2>/dev/null || true
+        echo "ALERTA: destination handoff $base appeared during migration; snapshot remains at $STAGING_DIR"
+        exit 1
+      fi
+      rm "$temporary" || exit 1
+    done
+
+    problems=0
+    validate_store "$STAGING_DIR"
+    validate_store "$DIR"
+    if [ "$problems" -gt 0 ]; then
+      echo "ALERTA: a store changed during final verification; snapshot remains at $STAGING_DIR"
+      exit 1
+    fi
+    for file in "$STAGING_DIR"/*.md; do
+      [ -e "$file" ] || continue
+      base=$(basename "$file")
+      if ! cmp -s "$file" "$DIR/$base"; then
+        echo "ALERTA: copied handoff $base changed before commit; snapshot remains at $STAGING_DIR"
+        exit 1
+      fi
+    done
+    for file in "$STAGING_DIR"/*.md; do
+      [ -e "$file" ] || continue
+      rm "$file" || exit 1
+    done
+    rmdir "$STAGING_DIR" || exit 1
+    echo "Migrated $staged_count handoff(s) to $DIR"
+  fi
 fi
 
 now=$(date +%s)
 count=0
 problems=0
-
-for file in "$DIR"/* "$DIR"/.[!.]*; do
-  [ -e "$file" ] || continue
-  base=$(basename "$file")
-
-  if [ -d "$file" ]; then
-    echo "ALERTA: $base/ - subdirectories are not allowed"
-    problems=$((problems + 1))
-    continue
-  fi
-
-  case "$base" in
-    *.md) ;;
-    *)
-      echo "ALERTA: $base - only .md files are allowed"
-      problems=$((problems + 1))
-      continue
-      ;;
-  esac
-
-  name=${base%.md}
-  if ! printf '%s' "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)+$'; then
-    echo "ALERTA: $base - expected <workspace>-<slug>.md in lowercase ASCII kebab-case"
-    problems=$((problems + 1))
-  fi
-
-  missing=""
-  grep -q '^# ' "$file" || missing="$missing title"
-  grep -q '^## Pronto quando$' "$file" || missing="$missing [Pronto quando]"
-  grep -q '^## Próximo passo$' "$file" || missing="$missing [Próximo passo]"
-  grep -Eq 'atualizado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$file" || missing="$missing [atualizado]"
-
-  if [ -n "$missing" ]; then
-    echo "ALERTA: $base - missing or invalid:$missing"
-    problems=$((problems + 1))
-  fi
-done
+validate_store "$DIR"
 
 for file in "$DIR"/*.md; do
   [ -e "$file" ] || continue
