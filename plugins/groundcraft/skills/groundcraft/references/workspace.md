@@ -16,6 +16,7 @@ Use repository conventions first. Git isolation is a means of preventing collisi
 - Use a separate worktree for parallel writers, long or interruptible work, risky experiments, or when isolation materially improves recovery.
 - Do not create a worktree for a tiny sequential change with no collision risk.
 - One writer owns a worktree at a time. Review and research agents remain read-only unless assigned an isolated worktree.
+- Provision only the worktrees needed concurrently. Defer the integration workspace decision until writers finish: reuse a clean writer tree when simple, or dedicate one when overlap, provenance, or collision isolation materially justifies it. Do not preprovision it by ritual.
 - Before resuming, revalidate branch, diff, upstream, dependencies, generated artifacts, and time-sensitive assumptions.
 
 ## Ignores, temporary files, and secrets

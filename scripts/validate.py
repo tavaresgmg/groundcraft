@@ -66,8 +66,8 @@ def validate_manifest(errors: list[str]) -> None:
         errors.append("plugin version must be semver")
     if manifest.get("skills") != "./skills/":
         errors.append("plugin skills path must be ./skills/")
-    if "hooks" in manifest:
-        errors.append("plugin manifest must not declare hooks")
+    if manifest.get("hooks") != "./hooks/hooks.json":
+        errors.append("plugin hooks path must be ./hooks/hooks.json")
     try:
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     except OSError as exc:
@@ -201,8 +201,13 @@ def validate_hooks(errors: list[str]) -> None:
     prompt = messages.get("UserPromptSubmit", "")
     if not all(word in prompt for word in ("substantial", "tiny", "casual", "translation")):
         errors.append("UserPromptSubmit must define the activation boundary")
-    if "$groundcraft-handoff" not in prompt or "first" not in prompt or "describing a sequence of steps" not in prompt:
-        errors.append("UserPromptSubmit must integrate one-time handoff continuity")
+    if (
+        "$groundcraft-handoff" not in prompt
+        or "unfinished cross-session work" not in prompt
+        or "never per task" not in prompt
+        or "describing a sequence of steps" not in prompt
+    ):
+        errors.append("UserPromptSubmit must keep handoff continuity demand-driven")
 
 
 def validate_evals(errors: list[str]) -> None:

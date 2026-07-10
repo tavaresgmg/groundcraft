@@ -8,13 +8,15 @@ Research when the task depends on current, external, unfamiliar, disputed, high-
 
 ## Route
 
-1. State the decision or uncertainty the research must resolve.
+1. State the decision or uncertainty the research must resolve. Break it into at most two to four claims whose answers can change the decision, and name the preferred source for each.
 2. Inspect local evidence first for repository behavior.
 3. Prefer current primary sources: official documentation, source code, standards, and release notes.
 4. Read changelogs and migration guides when versions or behavior may have changed.
 5. Use issues, pull requests, and maintainer discussions for known failures, maintenance, and unresolved edges.
 6. Use forums and social discussion for lived experience and failure discovery, not as sole proof of API, security, or compatibility claims.
 7. Compare source date, product version, environment, and author incentives.
+
+For genuinely broad or disputed research, use two or three orthogonal perspectives with one refuting question each. Search independent claims in parallel when the host supports it, then synthesize by claim rather than retelling each source. Converge as soon as constraints and primary evidence eliminate a branch.
 
 Do not call a search systematic unless its protocol, coverage, inclusion criteria, and exclusions support that claim. For ordinary engineering research, aim for decision-relevant coverage and state the limit.
 

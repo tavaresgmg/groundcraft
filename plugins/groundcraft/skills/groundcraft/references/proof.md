@@ -43,6 +43,6 @@ Use `pass@k` only when one successful candidate among several is useful. Use all
 
 ## Review
 
-Review the final diff for correctness, scope, simplicity, security, data safety, tests, documentation, and collateral changes. Use a genuinely fresh read-only reviewer when residual uncertainty or blast radius justifies the cost. Verify findings before changing code. If fresh review is unavailable, run a separate self-review pass and mark independent review as not validated.
+Review the final diff for correctness, scope, simplicity, security, data safety, tests, documentation, and collateral changes. Prefer the host's native diff-review surface when it directly covers the artifact. Use a genuinely fresh read-only reviewer only when residual uncertainty, blind review, or blast radius justifies the added context. Verify findings before changing code. If fresh review is unavailable, run a separate self-review pass and mark independent review as not validated.
 
 After the same failure twice, stop patching and diagnose. Report unavailable validation with its consequence; do not lower the completion standard silently.
