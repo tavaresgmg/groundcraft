@@ -24,6 +24,9 @@ PLUGIN = ROOT / "plugins" / "groundcraft"
 RESULTS = Path(
     os.environ.get("GROUNDCRAFT_EVAL_RESULTS", Path.home() / "Developer" / "work" / "groundcraft" / "evals")
 ).expanduser().resolve()
+USAGE_FIELDS = (
+    "input_tokens", "cached_input_tokens", "uncached_input_tokens", "output_tokens", "reasoning_output_tokens"
+)
 
 
 def utc_now() -> str:
@@ -151,9 +154,10 @@ def codex_command(case: dict[str, object], workspace: Path, model: str) -> list[
     return command
 
 
-def parse_events(stdout: str) -> tuple[str, int]:
+def parse_events(stdout: str) -> tuple[str, int, dict[str, int] | None]:
     messages: list[str] = []
     tool_calls = 0
+    usage: dict[str, int] | None = None
     for line in stdout.splitlines():
         try:
             event = json.loads(line)
@@ -165,7 +169,14 @@ def parse_events(stdout: str) -> tuple[str, int]:
                 messages.append(str(item.get("text", "")))
             elif item.get("type") not in {None, "reasoning"}:
                 tool_calls += 1
-    return "\n".join(messages), tool_calls
+        if event.get("type") == "turn.completed" and isinstance(event.get("usage"), dict):
+            raw = event["usage"]
+            usage = {
+                key: int(raw.get(key, 0))
+                for key in USAGE_FIELDS if key != "uncached_input_tokens"
+            }
+            usage["uncached_input_tokens"] = max(0, usage["input_tokens"] - usage["cached_input_tokens"])
+    return "\n".join(messages), tool_calls, usage
 
 
 def run_oracle(case: dict[str, object], workspace: Path, timeout: int) -> dict[str, object]:
@@ -202,13 +213,13 @@ def run_trial(
         execution = "pass" if exit_code == 0 else "fail"
     except (OSError, subprocess.TimeoutExpired) as exc:
         exit_code, stdout, stderr, execution = None, "", str(exc), "fail"
-    response, tool_calls = parse_events(stdout)
+    response, tool_calls, usage = parse_events(stdout)
     oracle = run_oracle(case, workspace, timeout)
     result = {
         "case_id": case["id"], "trial": trial, "run_at": utc_now(),
         "duration_seconds": round(time.monotonic() - started, 3),
         "execution": {"status": execution, "exit_code": exit_code, "stderr": stderr},
-        "response": response, "tool_calls": tool_calls, "oracle": oracle,
+        "response": response, "tool_calls": tool_calls, "usage": usage, "oracle": oracle,
         "git_status": command_output(["git", "-C", str(workspace), "status", "--short"])
         if (workspace / ".git").exists() else None,
         "semantic_review": {"status": "unreviewed", "must": case["must"], "must_not": case["must_not"]},
@@ -276,11 +287,16 @@ def execute(
     }
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     failures = sum(bool(result["hard_failure"]) for result in results)
+    measured = [result["usage"] for result in results if result.get("usage")]
+    usage = None if not measured else {
+        key: sum(int(item[key]) for item in measured)
+        for key in USAGE_FIELDS
+    }
     summary = {
         "run_id": identifier, "finished_at": utc_now(),
         "duration_seconds": round(time.monotonic() - started, 3),
         "cases": len(selected), "trials": len(results), "hard_failures": failures,
-        "semantic_unreviewed": len(results),
+        "semantic_unreviewed": len(results), "usage": usage,
         "release_status": "failed" if failures else "awaiting_semantic_review",
     }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")

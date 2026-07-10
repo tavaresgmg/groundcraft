@@ -35,6 +35,7 @@ def require_files(errors: list[str]) -> None:
         ROOT / "evals" / "cases.json",
         ROOT / "evals" / "README.md",
         ROOT / "scripts" / "run-evals.py",
+        ROOT / "scripts" / "install-local.py",
         ROOT / "scripts" / "validate-fixtures.py",
         ROOT / "tests" / "test_cli.py",
         PLUGIN / ".codex-plugin" / "plugin.json",

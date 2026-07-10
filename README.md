@@ -49,8 +49,19 @@ evals/cases.json                  behavioral contract cases
 scripts/validate.py               dependency-free structural validation
 scripts/validate-fixtures.py      fail-to-pass reference-oracle validation
 scripts/run-evals.py              focused behavioral runner
+scripts/install-local.py          clean local development install
 tests/test_cli.py                 validator and harness CLI regression tests
 ```
+
+## Local development
+
+Use releases as stable checkpoints. During active development, install the current source through a generated local marketplace:
+
+```bash
+python3 scripts/install-local.py
+```
+
+The command validates the source, copies only the plugin and marketplace metadata to `${CODEX_HOME:-$HOME/.codex}/groundcraft/dev-marketplace`, applies a local cachebuster there, and reinstalls `groundcraft@groundcraft`. The repository manifest stays unchanged. Start a new Codex thread after each reinstall.
 
 ## Validate
 
@@ -68,7 +79,7 @@ python3 scripts/run-evals.py --suite safety --repeat 2
 python3 scripts/run-evals.py --all
 ```
 
-The runner copies the current skill into a clean Codex home, uses disposable workspaces, and records the source hash, model, response trace, oracle result, Git state, and semantic rubric under `~/Developer/work/groundcraft/evals/`. It deliberately leaves `must` and `must_not` unreviewed instead of turning model self-review into a release claim.
+The runner copies the current skill into a clean Codex home, uses disposable workspaces, and records the source hash, model, token usage, response trace, oracle result, Git state, and semantic rubric under `~/Developer/work/groundcraft/evals/`. It deliberately leaves `must` and `must_not` unreviewed instead of turning model self-review into a release claim.
 
 ## Status
 
