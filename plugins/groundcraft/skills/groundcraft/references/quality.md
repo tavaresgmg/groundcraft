@@ -34,4 +34,6 @@ Use only the surfaces the task needs:
 
 Optimize for correctness, usefulness, safety, maintainability, and evidence. Treat tokens, time, tool calls, diff size, and ceremony as costs, not goals. Never reward a single metric that can be improved by weakening another required property.
 
+Each check must earn its latency with decision-relevant evidence. Running work asynchronously can keep the session responsive, but it does not make the user's wait free; do not start optional long validation merely because it can run in the background.
+
 Do not expose internal classification, module loading, or routine checklist narration unless it helps the user make a decision. Process compliance is not user value.

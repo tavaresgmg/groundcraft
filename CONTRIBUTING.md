@@ -12,6 +12,8 @@ Groundcraft changes behavior, so prompt edits are code changes.
 
 Do not add a phase, role, artifact, dependency, hook, or command without evidence that the existing method cannot handle the case. Avoid copied prompt text; cite ideas and write original instructions.
 
+Groundcraft is the canonical home for cross-cutting workflow rules. When a rule moves here from a personal setup, remove the overlapping global instruction or general-purpose skill in the same change. Keep environment-specific, style, and domain safety rules where they belong.
+
 The validator enforces a 140-line kernel, 80-line reference files, and a 10-14 case catalog. Treat these as complexity budgets, not targets to fill.
 
 Do not weaken a fixture, assertion, hidden oracle, or forbidden criterion to make a result pass. If the task or oracle is invalid, classify it as `invalid` and fix the harness before judging the agent.

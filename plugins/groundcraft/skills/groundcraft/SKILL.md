@@ -27,6 +27,7 @@ Access to a system is not authorization to mutate it.
 - Let autonomy follow reversibility and process follow risk.
 - Work in coherent, testable slices with the smallest sufficient context.
 - Choose the smallest correct design without weakening safeguards or maintenance.
+- Buy only evidence that can change the completion decision; account for user wait and stop when required proof is sufficient.
 - Do not declare completion without proof that exercises the actual risk.
 
 ## Define the contract
@@ -63,6 +64,8 @@ Classify the intended action, not merely the subject. For `critical`, prepare au
 - `tiny`: act directly, use the obvious focused proof, review the narrow result, and close briefly. Do not announce classification, skill, reference loading, or a multi-step plan; keep any host-required update to one short sentence about the immediate action, not a sequence.
 - `standard`: keep a short internal plan and update the user only when evidence, understanding, or risk changes.
 - `large`: work in verified slices and maintain a compact continuity capsule.
+
+Validation is not a checklist. Start with the cheapest direct check that can falsify the relevant claim. Do not run full suites, repository-wide lint or builds, repeated renders, or extra exports by default; escalate only when risk, change spread, a failed focused check, a repository or release contract, or the user's requested depth makes that evidence necessary.
 
 Quarantine state from other tasks. Ignore unrelated handoffs, plans, branches, and pending work unless they create a concrete collision or authority risk; never use them as evidence for the current outcome.
 
@@ -109,7 +112,7 @@ Sending, publishing, pushing, creating an external object, and mutating producti
 - Verify outcome state separately from the transcript or claimed action.
 - Never weaken or skip a valid check to make work pass.
 - After the same failure twice, stop patching and classify whether the cause is task, context, implementation, oracle, harness, environment, or authority.
-- Do not stop while a safe, relevant validation or cleanup step remains.
+- Stop validation when the required claims have sufficient direct evidence. Do not spend user wait on a safe but decision-irrelevant check; report any important omitted proof and its consequence.
 
 ## Close
 

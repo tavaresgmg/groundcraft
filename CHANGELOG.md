@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 - 2026-07-10
+
+- Added a proof budget that starts with focused evidence, accounts for user wait, and stops when required claims are sufficiently proven.
+- Made full suites, repository-wide lint or builds, repeated renders, and extra exports explicit escalation tools instead of defaults.
+- Separated mechanical visual checks from the user's subjective approval and covered the behavior with the focused tiny-change evaluation.
+
 ## 0.3.1 - 2026-07-09
 
 - Moved durable handoffs to `${CODEX_HOME:-$HOME/.codex}/groundcraft/handoffs/` so storage no longer assumes a `~/Developer` layout.
