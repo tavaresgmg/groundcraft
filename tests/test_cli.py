@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import copy
+import contextlib
 import importlib.util
+import io
 import json
 import os
 import socket
@@ -103,11 +105,15 @@ class EvalCliTest(unittest.TestCase):
         self.assertEqual(len(completed.stdout.splitlines()), len(self.catalog["cases"]))
 
     def test_suite_dry_run_filters_and_overrides_trials(self) -> None:
-        completed = run("scripts/run-evals.py", "--suite", "activation", "--repeat", "2", "--dry-run")
+        completed = run(
+            "scripts/run-evals.py", "--suite", "activation", "--repeat", "2",
+            "--arms", "native", "sham", "groundcraft", "--dry-run",
+        )
         expected = [case for case in self.catalog["cases"] if "activation" in case["suites"]]
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertEqual(len(completed.stdout.splitlines()), len(expected))
         self.assertTrue(all("trials=2" in line for line in completed.stdout.splitlines()))
+        self.assertTrue(all("arms=native,sham,groundcraft" in line for line in completed.stdout.splitlines()))
 
     def test_event_parser_keeps_response_and_tool_count(self) -> None:
         events = "\n".join((
@@ -128,6 +134,27 @@ class EvalCliTest(unittest.TestCase):
         command = self.runner.codex_command(case, Path("/tmp/groundcraft-eval"), "test-model")
         self.assertIn("--ephemeral", command)
         self.assertNotIn("developer_instructions", " ".join(command))
+
+    def test_native_arm_omits_explicit_groundcraft_invocation(self) -> None:
+        case = next(case for case in self.catalog["cases"] if case["invocation"] == "explicit")
+        native = self.runner.evaluation_prompt(case, "native")
+        sham = self.runner.evaluation_prompt(case, "sham")
+        self.assertNotIn("$groundcraft", native)
+        self.assertIn("Use $groundcraft.", sham)
+
+    def test_native_sham_and_groundcraft_homes_are_distinct(self) -> None:
+        case = next(case for case in self.catalog["cases"] if case["id"] == "grant-budget-review")
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            native, sham, groundcraft = (root / name for name in ("native", "sham", "groundcraft"))
+            self.runner.install_skills(native, "native", case)
+            self.runner.install_skills(sham, "sham", case)
+            self.runner.install_skills(groundcraft, "groundcraft", case)
+            self.assertFalse((native / ".agents" / "skills" / "groundcraft").exists())
+            sham_text = (sham / ".agents" / "skills" / "groundcraft" / "SKILL.md").read_text()
+            real_text = (groundcraft / ".agents" / "skills" / "groundcraft" / "SKILL.md").read_text()
+            self.assertIn("Handle the request normally.", sham_text)
+            self.assertNotEqual(sham_text, real_text)
 
     def test_local_marketplace_staging_keeps_source_unchanged(self) -> None:
         installer = load_module("groundcraft_install_local", "scripts/install-local.py")
@@ -158,7 +185,7 @@ class EvalCliTest(unittest.TestCase):
     def test_writable_fixture_is_copied_and_initialized(self) -> None:
         case = next(case for case in self.catalog["cases"] if case["id"] == "tiny-label-change")
         with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
-            workspace = self.runner.prepare_workspace(case, Path(directory), 1)
+            workspace = self.runner.prepare_workspace(case, Path(directory), "groundcraft", 1)
             self.assertTrue((workspace / ".git").is_dir())
             self.assertTrue((workspace / "ui.py").is_file())
             status = subprocess.run(
@@ -174,6 +201,30 @@ class EvalCliTest(unittest.TestCase):
             self.assertTrue((installed / "groundcraft" / "SKILL.md").is_file())
             self.assertTrue((installed / "groundcraft-handoff" / "SKILL.md").is_file())
 
+    def test_case_skill_is_composed_into_every_arm(self) -> None:
+        case = {
+            "skills": ["evals/fixtures/domain-skills/contribution-margin"],
+        }
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            home = Path(directory) / "home"
+            self.runner.install_skills(home, "native", case)
+            installed = home / ".agents" / "skills" / "contribution-margin" / "SKILL.md"
+            self.assertTrue(installed.is_file())
+
+    def test_local_extra_arm_installs_matching_skill_and_invokes_it(self) -> None:
+        case = next(case for case in self.catalog["cases"] if case["invocation"] == "explicit")
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            skill = Path(directory) / "competitor"
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(
+                "---\nname: competitor\ndescription: test\n---\n", encoding="utf-8"
+            )
+            extras = self.runner.parse_extra_arms([f"competitor={skill}"])
+            home = Path(directory) / "home"
+            self.runner.install_skills(home, "competitor", case, extras)
+            self.assertTrue((home / ".agents" / "skills" / "competitor" / "SKILL.md").is_file())
+            self.assertIn("Use $competitor.", self.runner.evaluation_prompt(case, "competitor", extras))
+
     @unittest.skipUnless(hasattr(socket, "AF_UNIX"), "requires Unix sockets")
     def test_materialize_moves_git_socket(self) -> None:
         socket_tmp = Path("/tmp") if Path("/tmp").is_dir() else TEST_TMP
@@ -185,11 +236,75 @@ class EvalCliTest(unittest.TestCase):
             server = socket.socket(socket.AF_UNIX)
             server.bind(str(endpoint))
             try:
-                result = {"case_id": "socket-case", "trial": 1}
-                self.runner.materialize(root / "results", result, "", workspace)
+                case = {"prompt": "test", "must": [], "must_not": []}
+                result = {
+                    "case_id": "socket-case", "arm": "groundcraft", "trial": 1,
+                    "response": "ok", "oracle": {"kind": "manual", "status": "unreviewed"},
+                    "git_status": None, "git_diff": None,
+                }
+                self.runner.materialize(root / "results", "sample-1", case, result, "", workspace)
             finally:
                 server.close()
-            self.assertTrue((root / "results" / "workspaces" / "socket-case" / "trial-1").is_dir())
+            self.assertTrue((root / "results" / "private" / "candidates" / "sample-1" / "workspace").is_dir())
+
+    def test_review_packet_does_not_reveal_arm_or_measurements(self) -> None:
+        case = {"prompt": "task", "must": ["x"], "must_not": ["y"]}
+        result = {
+            "arm": "groundcraft", "response": "answer", "oracle": {"kind": "manual"},
+            "git_status": None, "git_diff": None, "usage": {"input_tokens": 1},
+            "duration_seconds": 2.0,
+        }
+        packet = self.runner.review_packet(case, result)
+        serialized = json.dumps(packet)
+        self.assertNotIn("groundcraft", serialized)
+        self.assertNotIn("input_tokens", serialized)
+        self.assertNotIn("duration_seconds", serialized)
+
+    def test_release_gate_requires_complete_reviews_and_exact_artifact(self) -> None:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as directory:
+            root = Path(directory)
+            artifact = root / "artifact"
+            artifact.mkdir()
+            (artifact / "SKILL.md").write_text("candidate", encoding="utf-8")
+            case = {"id": "gate-case", "suites": ["regression"]}
+            catalog = root / "catalog.json"
+            catalog.write_text(json.dumps({"cases": [case]}), encoding="utf-8")
+            run_dir = root / "run"
+            (run_dir / "private" / "candidates").mkdir(parents=True)
+            manifest = {
+                "run_id": "gate-test", "source_sha256": self.runner.source_sha256(artifact),
+                "git_status": None, "git_divergence": "0\t0", "arms": list(self.runner.ARMS),
+                "cases": [case],
+            }
+            (run_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            assignments = {}
+            for arm in self.runner.ARMS:
+                opaque_id = f"sample-{arm}"
+                assignments[opaque_id] = {"case_id": "gate-case", "arm": arm, "trial": 1}
+                candidate = run_dir / "private" / "candidates" / opaque_id
+                candidate.mkdir()
+                candidate.joinpath("result.json").write_text(json.dumps({
+                    "hard_failure": False, "usage": None, "tool_calls": 0, "duration_seconds": 1.0,
+                }), encoding="utf-8")
+            (run_dir / "private" / "assignment-key.json").write_text(
+                json.dumps(assignments), encoding="utf-8"
+            )
+            original_catalog = self.runner.CATALOG
+            self.runner.CATALOG = catalog
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(self.runner.gate_run(run_dir, artifact, ["regression"]), 1)
+                decisions = run_dir / "review" / "decisions"
+                decisions.mkdir(parents=True)
+                for opaque_id in assignments:
+                    decisions.joinpath(f"{opaque_id}.json").write_text(json.dumps({
+                        "status": "pass", "reviewer": "blind-reviewer", "notes": "rubric satisfied",
+                        "reviewed_at": "2026-07-12T12:00:00+00:00",
+                    }), encoding="utf-8")
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(self.runner.gate_run(run_dir, artifact, ["regression"]), 0)
+            finally:
+                self.runner.CATALOG = original_catalog
 
 
 class HandoffCliTest(unittest.TestCase):

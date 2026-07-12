@@ -35,6 +35,7 @@ def require_files(errors: list[str]) -> None:
         ROOT / "evals" / "cases.json",
         ROOT / "evals" / "README.md",
         ROOT / "scripts" / "run-evals.py",
+        ROOT / "scripts" / "check-sources.py",
         ROOT / "scripts" / "install-local.py",
         ROOT / "scripts" / "validate-fixtures.py",
         ROOT / "tests" / "test_cli.py",
@@ -198,7 +199,7 @@ def validate_hooks(errors: list[str]) -> None:
             errors.append(f"{event} timeout must be 1-10 seconds")
         prompt = unix.group(1)
         if not all(word in prompt for word in ("delegated", "scope", "authority", "evidence", "uncertainty")):
-            errors.append("SubagentStart must preserve delegated scope, authority, and evidence")
+            errors.append("SubagentStart must remind agents about delegated scope, authority, and evidence")
 
 
 def validate_evals(errors: list[str]) -> None:
@@ -218,9 +219,9 @@ def validate_evals(errors: list[str]) -> None:
     suite_types = {"activation", "capability", "regression", "safety"}
     allowed = {
         "id", "task_type", "suites", "prompt", "cwd", "sandbox", "authority", "invocation",
-        "expected_mode", "trials", "oracle", "size", "risk", "must", "must_not",
+        "expected_mode", "trials", "oracle", "size", "risk", "must", "must_not", "skills",
     }
-    required = allowed - {"cwd"}
+    required = allowed - {"cwd", "skills"}
     ids: set[str] = set()
     prompts: set[str] = set()
     covered_tasks: set[str] = set()
@@ -262,6 +263,14 @@ def validate_evals(errors: list[str]) -> None:
             errors.append(f"{case_id}: critical cases require external-gated authority")
         if case.get("sandbox") == "workspace-write" and ("cwd" not in case or case.get("authority") != "local-write"):
             errors.append(f"{case_id}: writable cases require a fixture and local-write authority")
+        skills = case.get("skills", [])
+        if not isinstance(skills, list) or not all(isinstance(item, str) and item for item in skills):
+            errors.append(f"{case_id}: invalid skills")
+        else:
+            for item in skills:
+                skill = (ROOT / item).resolve()
+                if not skill.is_relative_to(ROOT) or not (skill / "SKILL.md").is_file():
+                    errors.append(f"{case_id}: invalid skill {item}")
         if not isinstance(case.get("trials"), int) or not 1 <= case["trials"] <= 3:
             errors.append(f"{case_id}: trials must be 1-3")
         for field in ("prompt", "must", "must_not"):

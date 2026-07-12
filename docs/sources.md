@@ -9,9 +9,9 @@ Groundcraft is an original synthesis. It adopts ideas, not copied prompt text.
 - [BMAD Method 6.10.0](https://github.com/bmad-code-org/BMAD-METHOD/releases/tag/v6.10.0): just-in-time files, explicit contracts, adversarial review, and halt states. MIT with trademark terms.
 - [Superpowers 6.1.1](https://github.com/obra/superpowers/releases/tag/v6.1.1): design gates, native worktree isolation, test-first practice, independent review, and evidence before completion. MIT.
 - [Ponytail 4.8.4](https://github.com/DietrichGebert/ponytail/releases/tag/v4.8.4): YAGNI, reuse, native-first design, complexity review, and repeated comparative evals. MIT.
-- [gstack 1.58.5.0](https://github.com/garrytan/gstack/blob/main/VERSION): browser QA, completion states, scope-drift review, release discipline, and a caution against prompt duplication. MIT.
-- [OpenSpec 1.5.0](https://github.com/Fission-AI/OpenSpec/releases/tag/v1.5.0): lightweight brownfield change agreements, delta specifications, and completeness/correctness/coherence verification. MIT.
-- [GitHub Spec Kit 0.12.9](https://github.com/github/spec-kit/releases/tag/v0.12.9): constitutions, requirement quality checks, executable planning artifacts, and workflow gates. MIT.
+- [gstack 1.60.1.0](https://github.com/garrytan/gstack/blob/main/VERSION): browser QA, completion states, scope-drift review, release discipline, and a caution against prompt duplication. MIT.
+- [OpenSpec 1.6.0](https://github.com/Fission-AI/OpenSpec/releases/tag/v1.6.0): lightweight brownfield change agreements, delta specifications, and completeness/correctness/coherence verification. MIT.
+- [GitHub Spec Kit 0.12.11](https://github.com/github/spec-kit/releases/tag/v0.12.11): constitutions, requirement quality checks, executable planning artifacts, and workflow gates. MIT.
 - [Nanostack 1.1.1](https://github.com/garagon/nanostack/releases/tag/v1.1.1): capability honesty, artifact-first coordination, harness manifests, and local orchestration. Apache-2.0.
 - [Compound Engineering 3.19.0](https://github.com/EveryInc/compound-engineering-plugin/releases/tag/compound-engineering-v3.19.0): blinded prompt comparisons, discriminating fixtures, restraint negatives, and grader sabotage tests. MIT.
 - [Harbor 0.18.0](https://github.com/harbor-framework/harbor/releases/tag/v0.18.0) and [mini-swe-agent 2.4.5](https://github.com/SWE-agent/mini-swe-agent/releases/tag/v2.4.5): task, trial, grader, outcome, and transcript vocabulary plus transparent minimal runners. Apache-2.0 and MIT.
@@ -54,7 +54,7 @@ These projects informed mechanisms, not a merged command catalog. Groundcraft de
 ## Platform behavior
 
 - [OpenAI Skills](https://developers.openai.com/codex/concepts/customization#skills): implicit matching, focused descriptions, and progressive disclosure.
-- [OpenAI Hooks](https://developers.openai.com/codex/hooks): plugin hook discovery, trust, supported command hooks, and targeted lifecycle injection; Groundcraft keeps only `SubagentStart` so ordinary turns pay no hook prompt cost.
+- [OpenAI Hooks](https://developers.openai.com/codex/hooks): plugin hook discovery, trust, supported command hooks, and targeted lifecycle injection; Groundcraft keeps only `SubagentStart`, whose output is injected when a subagent starts.
 - [OpenAI AGENTS guidance](https://developers.openai.com/codex/concepts/customization#agents-guidance): keep guidance small, route close to the relevant code, and pair recurring rules with executable checks.
 
 Community discussions were used to discover failure modes such as context bloat, command fatigue, document drift, unnecessary questions, and self-review bias. A representative [practitioner discussion about spec-driven frameworks](https://www.reddit.com/r/ClaudeCode/comments/1t2mym5/are_specdriven_frameworks_like_agent_os_bmad/) informed cases, not normative claims. Normative technical claims remain grounded in primary sources. Vendor sources are useful operational evidence but carry commercial incentives; Groundcraft prefers convergence with standards, peer-reviewed work, source code, and direct tests.

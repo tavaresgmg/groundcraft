@@ -90,7 +90,7 @@ Groundcraft starts with no auxiliary module and loads references only to resolve
 
 A specialized skill defines domain tools, validation, and output. Groundcraft does not repeat those instructions; it adds only missing cross-cutting controls. A style or communication layer runs last and cannot alter facts, evidence, or authority.
 
-The host's thread, goal, and plan own active execution. The bundled `groundcraft-handoff` companion owns only explicit cross-thread export, known continuation when native persistence is unavailable, or requested handoff operations; Groundcraft does not scan it on every task. It persists unfinished work under the portable Codex state root and outside repositories and versioned plugin caches, then closes the record after completion is proven. It migrates the former `~/Developer/work/handoffs/` store before the first handoff operation only when the destination is empty and both stores validate. A resumed handoff restores decisions and evidence pointers, not truth: the agent revalidates current artifacts, dependencies, external state, and time-sensitive assumptions before acting.
+The host's task, goal, and plan own active execution. The bundled `groundcraft-handoff` companion is only an explicit portable export when the original task cannot be resumed, or a requested handoff operation; Groundcraft does not scan it on every task. Its helper validates, lists, and safely migrates compact files under the portable Codex state root, outside repositories and versioned plugin caches. A resumed handoff restores decisions and evidence pointers, not truth: the agent revalidates current artifacts, dependencies, external state, and time-sensitive assumptions before acting.
 
 Native subagents are the default when work has independent read-heavy evidence branches, a useful specialist boundary, large noisy inputs, or a justified fresh review. They are not a ritual: sequential dependencies, tightly shared context, tiny work, and conflicting writes stay with the parent. The parent owns authority, synthesis, contradiction resolution, and verification.
 
@@ -119,6 +119,8 @@ For unexplained behavior: define symptom and expected state; reproduce or correl
 Behavioral changes require focused cases with explicit authority, expected outcome, forbidden behavior, fixture, and oracle. Regression cases should be deterministic where feasible; capability cases should remain challenging. Repeat trials only when variance can change the release decision.
 
 The catalog stays small enough to review as a whole and spans software plus non-software analysis, planning, research, review, and operations. Add a case only for a distinct escaped failure or contract boundary, and remove one when another case already covers the same risk. Neither repetition nor a larger harness rescues a broken task or oracle.
+
+Comparative evidence uses paired native, neutral-sham, and Groundcraft arms with fresh homes and workspaces, randomized order, and label-blind packets. The same domain skill is installed in every arm when composition is under test. A release gate requires complete independent review for affected regression and safety cases, clean synchronized provenance, and an exact delivered-source hash. Binary rubrics can establish failures and restraint; unless the evidence discriminates quality or efficiency, the honest comparative result is `inconclusive`.
 
 ## Closing receipt
 
