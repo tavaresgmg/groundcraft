@@ -231,6 +231,39 @@ def parse_events(stdout: str) -> tuple[str, int, dict[str, int] | None]:
     return "\n".join(messages), tool_calls, usage
 
 
+def scrub_evidence(value: str, workspace: Path) -> str:
+    return value.replace(str(workspace), "{workspace}")
+
+
+def extract_tool_evidence(stdout: str, workspace: Path) -> list[dict[str, object]]:
+    evidence: list[dict[str, object]] = []
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        item = event.get("item", {})
+        if event.get("type") != "item.completed" or not isinstance(item, dict):
+            continue
+        if item.get("type") == "command_execution":
+            command = str(item.get("command", ""))
+            if ".agents/skills" in command:
+                continue
+            evidence.append({
+                "type": "command", "command": scrub_evidence(command, workspace),
+                "exit_code": item.get("exit_code"),
+                "output": scrub_evidence(str(item.get("aggregated_output", "")), workspace)[:8000],
+            })
+        elif item.get("type") == "file_change":
+            changes = []
+            for change in item.get("changes", []):
+                raw_path = Path(str(change.get("path", "")))
+                path = str(raw_path.relative_to(workspace)) if raw_path.is_relative_to(workspace) else raw_path.name
+                changes.append({"path": path, "kind": change.get("kind")})
+            evidence.append({"type": "file_change", "changes": changes})
+    return evidence
+
+
 def run_oracle(case: dict[str, object], workspace: Path, timeout: int) -> dict[str, object]:
     oracle = case["oracle"]
     if oracle["kind"] == "manual":
@@ -269,12 +302,14 @@ def run_trial(
     except (OSError, subprocess.TimeoutExpired) as exc:
         exit_code, stdout, stderr, execution = None, "", str(exc), "fail"
     response, tool_calls, usage = parse_events(stdout)
+    tool_evidence = extract_tool_evidence(stdout, workspace)
     oracle = run_oracle(case, workspace, timeout)
     result = {
         "case_id": case["id"], "arm": arm, "trial": trial, "run_at": utc_now(),
         "duration_seconds": round(time.monotonic() - started, 3),
         "execution": {"status": execution, "exit_code": exit_code, "stderr": stderr},
-        "response": response, "tool_calls": tool_calls, "usage": usage, "oracle": oracle,
+        "response": response, "tool_calls": tool_calls, "tool_evidence": tool_evidence,
+        "usage": usage, "oracle": oracle,
         "git_status": command_output(["git", "-C", str(workspace), "status", "--short"])
         if (workspace / ".git").exists() else None,
         "git_diff": command_output(["git", "-C", str(workspace), "diff", "--no-ext-diff"])
@@ -286,7 +321,8 @@ def run_trial(
 
 def review_packet(case: dict[str, object], result: dict[str, object]) -> dict[str, object]:
     return {
-        "prompt": case["prompt"], "response": result["response"], "oracle": result["oracle"],
+        "prompt": case["prompt"], "response": result["response"], "tool_evidence": result.get("tool_evidence", []),
+        "oracle": result["oracle"],
         "git_status": result["git_status"], "git_diff": result["git_diff"],
         "rubric": {"must": case["must"], "must_not": case["must_not"]},
         "decision_schema": {

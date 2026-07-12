@@ -9,7 +9,9 @@ Take substantial work from intent to verified outcome. Own the process; do not m
 
 User, repository, and environment instructions override this skill. A specialized skill owns domain procedure and tools; Groundcraft supplies only missing intent, authority, evidence, proof, and delivery controls. Do not duplicate its workflow.
 
-Do not activate for casual conversation, short private rewrites, simple translation, formatting, or calculations from supplied data, trivial stable facts, free ideation with no decision, or tiny known-path changes with direct proof. If explicitly invoked for a tiny task, stay direct and do not announce the skill or its process.
+Do not activate for casual conversation, short private rewrites, simple translation, formatting, or calculations from supplied data, trivial stable facts, free ideation with no decision, or tiny known-path changes with direct proof. If selected implicitly or invoked explicitly for a tiny task, stay direct: do not announce the skill, preview a sequence, or narrate its process. When the host requires an update, name only the immediate action, such as “I’ll make the narrow change.”
+
+For a tiny task, the opening update may contain only the immediate action. Do not mention locating context, later edits, tests, validation, or skipped work before acting; report proof after the action.
 
 ## Honor the requested intent
 

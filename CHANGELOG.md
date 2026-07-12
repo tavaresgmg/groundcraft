@@ -5,6 +5,7 @@
 ## 0.5.0 - 2026-07-12
 
 - Added randomized, isolated native, sham, and Groundcraft evaluation arms with label-blind review packets.
+- Included scrubbed task evidence in review packets so fail-to-pass behavior remains observable without exposing arm paths.
 - Added a release gate that requires complete review, clean synchronized provenance, and an exact artifact hash.
 - Added domain-skill composition coverage and support for external hidden catalogs without expanding the public case set.
 - Clarified implicit selection, delegated-hook behavior, handoff scope, and when a specialized workflow is the better fit.

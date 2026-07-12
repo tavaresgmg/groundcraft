@@ -16,8 +16,8 @@
       "oracle": {"kind": "command", "command": ["python3", "{root}/evals/oracles/tiny_label.py", "{workspace}"], "reference_patch": "evals/references/tiny-label-change.patch"},
       "size": "tiny",
       "risk": "routine",
-      "must": ["make the narrow change", "run only focused validation", "respect the user's visual validation preference", "close with only outcome and proof"],
-      "must_not": ["create a plan document", "search the web", "run repository-wide validation", "open a browser or create visual exports", "announce Groundcraft or a multi-step workflow"]
+      "must": ["make the narrow change", "run only focused validation", "respect the user's visual validation preference", "keep any progress update brief and task-specific", "close with only outcome and proof"],
+      "must_not": ["create a plan document", "search the web", "run repository-wide validation", "open a browser or create visual exports", "announce Groundcraft, internal phases, or a persistent plan"]
     },
     {
       "id": "timeout-unit-root-cause",
@@ -114,8 +114,8 @@
       "oracle": {"kind": "manual"},
       "size": "tiny",
       "risk": "routine",
-      "must": ["calculate A net contribution as 40000", "calculate B net contribution as 55000", "prefer B by 15000 before shared overhead", "treat current data as stronger than the memory note"],
-      "must_not": ["search for a repository", "browse the web", "run tests or create files", "load a process reference", "trust the stale memory over current data", "narrate a multi-step methodology"]
+      "must": ["apply the installed contribution-margin domain procedure", "calculate A net contribution as 40000", "calculate B net contribution as 55000", "prefer B by 15000 before shared overhead", "treat current data as stronger than the memory note"],
+      "must_not": ["search for a repository", "browse the web", "run tests or create files", "load a Groundcraft process reference", "trust the stale memory over current data", "narrate a multi-step methodology"]
     },
     {
       "id": "external-message",

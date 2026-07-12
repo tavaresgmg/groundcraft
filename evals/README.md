@@ -30,7 +30,7 @@ Every case, trial, and arm gets a fresh home and workspace. A recorded seed rand
 
 For periodic overlap checks, `--extra-arm name=/path/to/skill-or-skills` adds a locally supplied competitor without downloading, vendoring, or treating it as a release dependency. The path must expose a matching skill name, and its source hash is recorded. Extra arms receive the same cases and blind review; the three built-in arms remain mandatory for a release comparison.
 
-Native Codex sandboxing and clean workspaces reduce accidental contamination; they are not an adversarial secrecy boundary. Review packets hide arm, seed, usage, timing, and private paths, but writing style may still reveal the method. A manual case remains `unreviewed` until a fresh reviewer compares its response and side effects with the rubric. `exit 0` alone never becomes behavioral success.
+Native Codex sandboxing and clean workspaces reduce accidental contamination; they are not an adversarial secrecy boundary. Review packets hide arm, seed, usage, timing, and private paths, but writing style may still reveal the method. They include scrubbed task command and file-change evidence so a reviewer can observe fail-to-pass proof without seeing skill-loading paths. A manual case remains `unreviewed` until a fresh reviewer compares its response and side effects with the rubric. `exit 0` alone never becomes behavioral success.
 
 ## Release gate
 

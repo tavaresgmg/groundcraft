@@ -129,6 +129,25 @@ class EvalCliTest(unittest.TestCase):
             "output_tokens": 12, "reasoning_output_tokens": 4,
         }))
 
+    def test_review_evidence_keeps_task_failure_and_hides_skill_loading(self) -> None:
+        workspace = Path("/tmp/eval/workspaces/case/groundcraft/trial-1")
+        events = "\n".join((
+            json.dumps({"type": "item.completed", "item": {
+                "type": "command_execution", "command": f"cd {workspace} && python -m unittest",
+                "aggregated_output": f"FAIL at {workspace}/test_case.py", "exit_code": 1,
+            }}),
+            json.dumps({"type": "item.completed", "item": {
+                "type": "command_execution", "command": "sed -n 1,20p /tmp/home/.agents/skills/groundcraft/SKILL.md",
+                "aggregated_output": "private method", "exit_code": 0,
+            }}),
+        ))
+        evidence = self.runner.extract_tool_evidence(events, workspace)
+        self.assertEqual(len(evidence), 1)
+        serialized = json.dumps(evidence)
+        self.assertIn("FAIL at {workspace}/test_case.py", serialized)
+        self.assertNotIn(".agents/skills", serialized)
+        self.assertNotIn("/groundcraft/trial-1", serialized)
+
     def test_codex_command_uses_native_skill_matching_without_hook_injection(self) -> None:
         case = next(case for case in self.catalog["cases"] if case["id"] == "four-day-week-research")
         command = self.runner.codex_command(case, Path("/tmp/groundcraft-eval"), "test-model")
